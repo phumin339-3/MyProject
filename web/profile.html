@@ -4,118 +4,231 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Profile</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background-color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .tabs {
+      position: fixed;  /* ✅ ทำให้แถบเมนูติดด้านบน */
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      padding: 10px 0;
+      border-bottom: 2px solid #ddd;
+      display: flex;
+      justify-content: center;
+      z-index: 1000; /* ✅ ให้แถบเมนูอยู่ด้านหน้า */
+    }
+
+    body {
+      padding-top: 50px; /* ✅ ป้องกันคอนเทนต์โดนแถบเมนูบัง */
+    }
+    .tabs a {
+      text-decoration: none;
+      color: black;
+      padding: 15px 20px;
+      margin: 0 10px;
+    }
+    .tabs a.active {
+      border-bottom: 3px solid #6C7A89;
+      font-weight: bold;
+    }
+    .profile-container {
+      background: white;
+      padding: 30px;
+      width: 50%;
+      text-align: center;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .profile-container img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #6C7A89;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+    .profile-container h2 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .profile-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .profile-container .edit-icon {
+      cursor: pointer;
+      color: #6C7A89;
+    }
+    .profile-container button {
+      background-color: #6C7A89;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    .profile-container button:hover {
+      background-color: #A3C6C4;
+    }
+  </style>
 </head>
 <body>
-  <h2>Edit Profile</h2>
-  <form id="edit-profile-form">
-    <label for="name">Name:</label>
-    <input type="text" id="name" required><br><br>
+
+  <!-- ✅ Tab Menu -->
+  <div class="tabs">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="editProfile.html" class="active">Edit Profile</a>
+    <a href="editPassword.html">Edit Password</a>
+    <a href="#" id="logout">User Logout</a>
+  </div>
+
+  <!-- ✅ Profile Form -->
+  <div class="profile-container">
+    <img id="preview" src="default-profile.jpg" alt="Profile Picture">
+    <h2><span id="display-name">Jessica Alba</span> 
+      <span class="edit-icon">✏️</span>
+    </h2>
+    <p>@<span id="username">jennywilson</span></p>
     
-    <label for="email">Email:</label>
-    <input type="email" id="email" required><br><br>
-    
-    <label for="photo">Profile Picture:</label>
-    <input type="file" id="photo" accept="image/*"><br><br>
-    
-    <button type="submit">Save</button>
-    <button type="button" id="back-button">Back to Dashboard</button>
-  </form>
+    <form id="edit-profile-form">
+      <label for="photo">Change Profile Picture:</label>
+      <input type="file" id="photo" accept="image/*">
+      
+      <label>Username:</label>
+      <input type="text" id="name" required>
+      
+      <label>Email:</label>
+      <input type="email" id="email" readonly>
+
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
-    import { getAuth, updateProfile, updateEmail, reauthenticateWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
-    import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-storage.js';
+    import { getAuth, updateProfile, signOut } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+    import { getDatabase, ref, set, update, get } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
 
-    // Firebase configuration
+    // ✅ Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
       authDomain: "myproject-9bc7e.firebaseapp.com",
       projectId: "myproject-9bc7e",
-      storageBucket: "myproject-9bc7e.appspot.com",
-      messagingSenderId: "761031996090",
+      databaseURL: "https://myproject-9bc7e-default-rtdb.firebaseio.com/",
       appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
-      measurementId: "G-YSGKSJG3ML"
     };
 
-    // Initialize Firebase
+    // ✅ Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const storage = getStorage(app);
-    const provider = new GoogleAuthProvider();
 
     const form = document.getElementById('edit-profile-form');
-    const backButton = document.getElementById('back-button');
+    const previewImg = document.getElementById('preview');
+    const backButton = document.getElementById('back-to-dashboard');
+    const logoutButton = document.getElementById('logout');
+    let base64Image = "";
 
-    // โหลดข้อมูลผู้ใช้
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        document.getElementById('name').value = user.displayName || "";
-        document.getElementById('email').value = user.email || "";
-      } else {
-        window.location.replace('index.html'); // กลับไปที่หน้า Login ถ้าไม่ได้เข้าสู่ระบบ
+    // 📌 แสดงตัวอย่างรูปภาพที่เลือก
+    document.getElementById('photo').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          base64Image = e.target.result;
+          previewImg.src = base64Image;  // ✅ อัปเดต Preview
+        };
+        reader.readAsDataURL(file);
       }
     });
 
-    // ฟังก์ชันอัปเดตข้อมูลผู้ใช้
-    const updateUserProfile = async (name, email, photo) => {
-      try {
-        const user = auth.currentUser;
-        const userId = user.uid;
-        const userRef = ref(db, 'users/' + userId);
+    // 📌 โหลดข้อมูลผู้ใช้
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        document.getElementById('name').value = user.displayName || "";
+        document.getElementById('email').value = user.email || "";
+        document.getElementById('display-name').textContent = user.displayName || "User";
+        
+        const userRef = ref(db, 'users/' + user.uid);
 
-        let photoURL = user.photoURL; // ค่ารูปโปรไฟล์เดิม
-        if (photo) {
-          // อัปโหลดรูปใหม่
-          const storageReference = storageRef(storage, 'profile-pictures/' + userId);
-          const snapshot = await uploadBytes(storageReference, photo);
-          photoURL = await getDownloadURL(snapshot.ref);
-        }
-
-        // อัปเดตโปรไฟล์ Firebase Authentication
-        await updateProfile(user, { displayName: name, photoURL });
-
-        // อัปเดตอีเมล (ต้องลงชื่อเข้าใช้ใหม่ก่อน)
-        if (email !== user.email) {
-          try {
-            await updateEmail(user, email);
-          } catch (error) {
-            if (error.code === 'auth/requires-recent-login') {
-              alert("You need to reauthenticate before changing email.");
-              await reauthenticateWithPopup(user, provider); // รีเซ็นอินด้วย Google
-              await updateEmail(user, email);
-            } else {
-              throw error;
+        try {
+          const snapshot = await get(userRef);
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            document.getElementById('username').textContent = userData.username || "user123";
+            if (userData.photo) {
+              previewImg.src = userData.photo;  // ✅ โหลดรูปจาก Firebase Database
+              base64Image = userData.photo;  // ✅ อัปเดตค่า base64Image ด้วย
             }
           }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
+      } else {
+        window.location.replace('index.html');
+      }
+    });
 
-        // อัปเดตข้อมูลใน Realtime Database
-        await set(userRef, { name, email, photo: photoURL });
+    // 📌 ฟังก์ชันอัปเดตข้อมูลผู้ใช้
+    const updateUserProfile = async (name) => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const userRef = ref(db, 'users/' + user.uid);
+
+        // ✅ อัปเดต Firebase Authentication
+        await updateProfile(user, { displayName: name });
+
+        // ✅ อัปเดต Firebase Realtime Database
+        await update(userRef, { name, email: user.email, photo: base64Image });
 
         alert('Profile updated successfully!');
-        window.location.replace('dashboard.html'); // กลับไปที่ Dashboard
+        window.location.replace('dashboard.html'); // กลับไปหน้า Dashboard
       } catch (error) {
         console.error('Error updating profile:', error);
         alert('Error updating profile: ' + error.message);
       }
     };
 
-    // เมื่อกดปุ่ม Save
+    // 📌 เมื่อกดปุ่ม Save
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+      e.preventDefault();
       const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const photo = document.getElementById('photo').files[0];
-
-      await updateUserProfile(name, email, photo);
+      await updateUserProfile(name);
     });
 
-    // เมื่อกดปุ่ม Back to Dashboard
+    // 📌 ปุ่ม Logout
+    logoutButton.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.replace('index.html');
+    });
+
+    // 📌 เมื่อกดปุ่ม Back to Dashboard
     backButton.addEventListener('click', () => {
       window.location.replace('dashboard.html');
     });
+
   </script>
 </body>
 </html>

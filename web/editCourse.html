@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Course</title>
+  <title>Edit Course</title>
   <style>
     * {
       box-sizing: border-box;
@@ -20,20 +20,12 @@
       height: 100vh;
     }
     .tabs {
-      position: fixed;  
-      top: 0;
-      left: 0;
+      display: flex;
       width: 100%;
       background-color: white;
       padding: 10px 0;
       border-bottom: 2px solid #ddd;
-      display: flex;
       justify-content: center;
-      z-index: 1000; 
-    }
-
-    body {
-      padding-top: 50px; 
     }
     .tabs a {
       text-decoration: none;
@@ -45,7 +37,7 @@
       border-bottom: 3px solid #6C7A89;
       font-weight: bold;
     }
-    .form-container {
+    .course-container {
       background: white;
       padding: 30px;
       width: 50%;
@@ -53,26 +45,26 @@
       border-radius: 8px;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     }
-    .form-container h2 {
+    .course-container img {
+      width: 120px;
+      height: 120px;
+      border-radius: 10px;
+      border: 3px solid #6C7A89;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+    .course-container h2 {
       margin-bottom: 10px;
       color: #333;
     }
-    .form-container input {
+    .course-container input {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
       border: 1px solid #ddd;
       border-radius: 5px;
     }
-    .form-container img {
-      width: 120px;
-      height: 120px;
-      border-radius: 5px;
-      object-fit: cover;
-      margin-bottom: 10px;
-      border: 2px solid #6C7A89;
-    }
-    .form-container button {
+    .course-container button {
       background-color: #6C7A89;
       color: white;
       border: none;
@@ -83,77 +75,44 @@
       margin-top: 10px;
       transition: background 0.3s;
     }
-    .form-container button:hover {
-      background-color: #A3C6C4;
-    }
-    .image-preview-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    .image-preview-container img {
-      width: 120px;
-      height: 120px;
-      border-radius: 5px;
-      object-fit: cover;
-      border: 2px solid #6C7A89;
-    }
-
-    .image-preview-container button {
-      margin-top: 10px; /* เพิ่มช่องว่างระหว่างรูปกับปุ่ม */
-      background-color: #6C7A89;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-
-    .image-preview-container button:hover {
+    .course-container button:hover {
       background-color: #A3C6C4;
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ Tab Menu -->
+  <!-- ✅ Tab Menu (มีแค่ 3 อัน) -->
   <div class="tabs">
     <a href="dashboard.html">Dashboard</a>
-    <a href="addCourse.html" class="active">Add Course</a>
+    <a href="editCourse.html" class="active">Edit Course</a>
     <a href="#" id="logout">User Logout</a>
   </div>
 
-  <!-- ✅ Add Course Form -->
-  <div class="form-container">
-    <h2>Add New Course</h2>
+  <!-- ✅ Course Edit Form -->
+  <div class="course-container">
+    <img id="preview" src="default-course.jpg" alt="Course Preview">
+    <h2><span id="display-course-name">Course Name</span></h2>
     
-    <form id="add-course-form">
-      <label for="cid">Course ID:</label>
-      <input type="text" id="cid" required>
-
-      <label for="course-name">Course Name:</label>
+    <form id="edit-course-form">
+      <label for="course-image">Change Course Image:</label>
+      <input type="file" id="course-image" accept="image/*">
+      
+      <label>Course Name:</label>
       <input type="text" id="course-name" required>
-
-      <label for="classroom-name">Classroom Name:</label>
+      
+      <label>Classroom Name:</label>
       <input type="text" id="classroom-name" required>
 
-      <label for="course-image">Course Image (optional):</label>
-      <input type="file" id="course-image" accept="image/*">
-
-      <div class="image-preview-container">
-      <img id="preview" src="default-course.jpg" alt="Course Preview">
-      <button type="submit">Save Course</button>
+      <button type="submit">Save Changes</button>
+      <button type="button" id="back-to-dashboard">Back to Dashboard</button>
     </form>
   </div>
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
-    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+    import { getDatabase, ref, update, get } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
 
     // ✅ Firebase Configuration
     const firebaseConfig = {
@@ -169,11 +128,47 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const form = document.getElementById('add-course-form');
+    const form = document.getElementById('edit-course-form');
     const previewImg = document.getElementById('preview');
-    const logoutButton = document.getElementById('logout');
     const backButton = document.getElementById('back-to-dashboard');
+    const logoutButton = document.getElementById('logout');
     let base64Image = "";
+
+    // 📌 ดึงข้อมูลคอร์สจาก localStorage
+    const courseId = localStorage.getItem('editCourseId');
+    const courseName = localStorage.getItem('editCourseName');
+    const classroomName = localStorage.getItem('editClassroomName');
+
+    if (!courseId) {
+        alert("No course selected for editing!");
+        window.location.replace('dashboard.html');
+    }
+
+    document.getElementById('course-name').value = courseName;
+    document.getElementById('classroom-name').value = classroomName;
+    document.getElementById('display-course-name').textContent = courseName;
+
+    // 📌 โหลดรูปภาพคอร์สจาก Firebase Realtime Database
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const courseRef = ref(db, `users/${user.uid}/classroom/${courseId}`);
+
+        try {
+          const snapshot = await get(courseRef);
+          if (snapshot.exists()) {
+            const courseData = snapshot.val();
+            if (courseData.image) {
+              previewImg.src = courseData.image;  // ✅ โหลดรูปจาก Firebase Database
+              base64Image = courseData.image;  // ✅ อัปเดตค่า base64Image ด้วย
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching course data:", error);
+        }
+      } else {
+        window.location.replace('index.html');
+      }
+    });
 
     // 📌 แสดงตัวอย่างรูปภาพที่เลือก
     document.getElementById('course-image').addEventListener('change', (event) => {
@@ -188,46 +183,31 @@
       }
     });
 
-    // 📌 โหลดข้อมูลผู้ใช้
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        window.location.replace('index.html');
-      }
-    });
-
-    // 📌 ฟังก์ชันบันทึกข้อมูลคอร์ส
-    const saveCourse = async (courseId, courseName, classroomName) => {
+    // 📌 ฟังก์ชันอัปเดตข้อมูลคอร์ส
+    const updateCourse = async (name, classroom) => {
       try {
         const user = auth.currentUser;
         if (!user) return;
 
         const courseRef = ref(db, `users/${user.uid}/classroom/${courseId}`);
 
-        // ✅ บันทึกข้อมูลคอร์สลง Firebase Realtime Database
-        await set(courseRef, {
-          name: courseName,
-          classroom: classroomName,
-          image: base64Image, // ✅ บันทึกรูปภาพเป็น Base64
-        });
+        // ✅ อัปเดต Firebase Realtime Database
+        await update(courseRef, { name, classroom, image: base64Image });
 
-        // ✅ แจ้งให้ Dashboard โหลดข้อมูลใหม่
-        localStorage.setItem('courseUpdated', 'true');
-
-        alert('Course saved successfully!');
+        alert('Course updated successfully!');
         window.location.replace('dashboard.html'); // กลับไปหน้า Dashboard
       } catch (error) {
-        console.error('Error saving course:', error);
-        alert('Error saving course: ' + error.message);
+        console.error('Error updating course:', error);
+        alert('Error updating course: ' + error.message);
       }
     };
 
     // 📌 เมื่อกดปุ่ม Save
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const courseId = document.getElementById('cid').value;
-      const courseName = document.getElementById('course-name').value;
-      const classroomName = document.getElementById('classroom-name').value;
-      await saveCourse(courseId, courseName, classroomName);
+      const name = document.getElementById('course-name').value;
+      const classroom = document.getElementById('classroom-name').value;
+      await updateCourse(name, classroom);
     });
 
     // 📌 ปุ่ม Logout
