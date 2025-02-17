@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Google Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #E0E7E9;
+      color: #354649;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #6C7A89;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin: 10px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #A3C6C4;
+    }
+    #logout {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Login with Google</h1>
+  <button id="google-login">Login with Google</button>
+  <button id="logout">Logout</button>
+
+  <script type="module">
+    import { googleSignIn, logout } from './firebase.js';
+
+    const googleLoginButton = document.getElementById('google-login');
+    if (googleLoginButton) {
+      googleLoginButton.addEventListener('click', googleSignIn);
+    }
+
+    const logoutButton = document.getElementById('logout');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', logout);
+    }
+  </script>
+</body>
+</html>

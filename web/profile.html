@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile</title>
+</head>
+<body>
+  <h2>Edit Profile</h2>
+  <form id="edit-profile-form">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required><br><br>
+    
+    <label for="email">Email:</label>
+    <input type="email" id="email" required><br><br>
+    
+    <label for="photo">Profile Picture:</label>
+    <input type="file" id="photo" accept="image/*"><br><br>
+    
+    <button type="submit">Save</button>
+    <button type="button" id="back-button">Back to Dashboard</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
+    import { getAuth, updateProfile, updateEmail, reauthenticateWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+    import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-storage.js';
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
+      authDomain: "myproject-9bc7e.firebaseapp.com",
+      projectId: "myproject-9bc7e",
+      storageBucket: "myproject-9bc7e.appspot.com",
+      messagingSenderId: "761031996090",
+      appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
+      measurementId: "G-YSGKSJG3ML"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+    const provider = new GoogleAuthProvider();
+
+    const form = document.getElementById('edit-profile-form');
+    const backButton = document.getElementById('back-button');
+
+    // โหลดข้อมูลผู้ใช้
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        document.getElementById('name').value = user.displayName || "";
+        document.getElementById('email').value = user.email || "";
+      } else {
+        window.location.replace('index.html'); // กลับไปที่หน้า Login ถ้าไม่ได้เข้าสู่ระบบ
+      }
+    });
+
+    // ฟังก์ชันอัปเดตข้อมูลผู้ใช้
+    const updateUserProfile = async (name, email, photo) => {
+      try {
+        const user = auth.currentUser;
+        const userId = user.uid;
+        const userRef = ref(db, 'users/' + userId);
+
+        let photoURL = user.photoURL; // ค่ารูปโปรไฟล์เดิม
+        if (photo) {
+          // อัปโหลดรูปใหม่
+          const storageReference = storageRef(storage, 'profile-pictures/' + userId);
+          const snapshot = await uploadBytes(storageReference, photo);
+          photoURL = await getDownloadURL(snapshot.ref);
+        }
+
+        // อัปเดตโปรไฟล์ Firebase Authentication
+        await updateProfile(user, { displayName: name, photoURL });
+
+        // อัปเดตอีเมล (ต้องลงชื่อเข้าใช้ใหม่ก่อน)
+        if (email !== user.email) {
+          try {
+            await updateEmail(user, email);
+          } catch (error) {
+            if (error.code === 'auth/requires-recent-login') {
+              alert("You need to reauthenticate before changing email.");
+              await reauthenticateWithPopup(user, provider); // รีเซ็นอินด้วย Google
+              await updateEmail(user, email);
+            } else {
+              throw error;
+            }
+          }
+        }
+
+        // อัปเดตข้อมูลใน Realtime Database
+        await set(userRef, { name, email, photo: photoURL });
+
+        alert('Profile updated successfully!');
+        window.location.replace('dashboard.html'); // กลับไปที่ Dashboard
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        alert('Error updating profile: ' + error.message);
+      }
+    };
+
+    // เมื่อกดปุ่ม Save
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const photo = document.getElementById('photo').files[0];
+
+      await updateUserProfile(name, email, photo);
+    });
+
+    // เมื่อกดปุ่ม Back to Dashboard
+    backButton.addEventListener('click', () => {
+      window.location.replace('dashboard.html');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Course</title>
+</head>
+<body>
+  <h2>Add New Course</h2>
+  <form id="add-course-form">
+    <label for="cid">Course ID:</label>
+    <input type="text" id="cid" required><br><br>
+    
+    <label for="course-name">Course Name:</label>
+    <input type="text" id="course-name" required><br><br>
+    
+    <label for="classroom-name">Classroom Name:</label>
+    <input type="text" id="classroom-name" required><br><br>
+    
+    <label for="image-link">Image Link:</label>
+    <input type="text" id="image-link"><br><br>
+    
+    <label for="image-upload">Upload Image (optional):</label>
+    <input type="file" id="image-upload" accept="image/*"><br><br>
+
+    <button type="submit">Save Course</button>
+  </form>
+
+  <button id="back-to-dashboard">Back to Dashboard</button>
+
+  <script type="module">
+    import { saveCourse } from './firebase.js'; // ฟังก์ชันบันทึกวิชา
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+
+    const auth = getAuth();
+
+    // เพิ่ม event listener ให้ปุ่มกลับไปหน้า Dashboard
+    document.getElementById('back-to-dashboard').addEventListener('click', () => {
+      window.location.href = 'dashboard.html'; // ส่งไปยังหน้า Dashboard
+    });
+
+    // เมื่อฟอร์มถูกส่ง
+    const form = document.getElementById('add-course-form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const courseId = document.getElementById('cid').value;
+      const courseName = document.getElementById('course-name').value;
+      const classroomName = document.getElementById('classroom-name').value;
+      const imageLink = document.getElementById('image-link').value;
+      const imageFile = document.getElementById('image-upload').files[0];
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          saveCourse(user.uid, courseId, courseName, classroomName, imageLink, imageFile)
+            .then(() => {
+              window.location.href = 'dashboard.html'; // กลับไปหน้า Dashboard หลังบันทึก
+            })
+            .catch((error) => {
+              console.error("Error saving course:", error);
+            });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
