@@ -12,7 +12,7 @@
       font-family: Arial, sans-serif;
     }
     body {
-      background-color: #f5f5f5;
+      background-color: #E0E7E9;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -20,7 +20,7 @@
       height: 100vh;
     }
     .tabs {
-      position: fixed;  
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -29,21 +29,31 @@
       border-bottom: 2px solid #ddd;
       display: flex;
       justify-content: center;
-      z-index: 1000; 
+      z-index: 1000;
     }
-
     body {
-      padding-top: 50px; 
+      padding-top: 50px;
     }
     .tabs a {
       text-decoration: none;
       color: black;
       padding: 15px 20px;
       margin: 0 10px;
+      position: relative;
     }
-    .tabs a.active {
-      border-bottom: 3px solid #6C7A89;
-      font-weight: bold;
+    .tabs a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+      width: 100%;
+      height: 3px;
+      background-color: #2CBFAE;
+      transform: scaleX(0);
+      transition: transform 0.3s ease-in-out;
+    }
+    .tabs a:hover::after {
+      transform: scaleX(1);
     }
     .form-container {
       background: white;
@@ -55,25 +65,18 @@
     }
     .form-container h2 {
       margin-bottom: 10px;
-      color: #333;
+      color: #354649;
     }
     .form-container input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
       border: 1px solid #ddd;
       border-radius: 5px;
-    }
-    .form-container img {
-      width: 120px;
-      height: 120px;
-      border-radius: 5px;
-      object-fit: cover;
-      margin-bottom: 10px;
-      border: 2px solid #6C7A89;
+      text-align: center;
     }
     .form-container button {
-      background-color: #6C7A89;
+      background-color: #2CBFAE;
       color: white;
       border: none;
       padding: 12px 20px;
@@ -84,50 +87,47 @@
       transition: background 0.3s;
     }
     .form-container button:hover {
-      background-color: #A3C6C4;
+      background-color: #41D3BD;
     }
-    .image-preview-container {
+    .file-input {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      margin-top: 10px;
-    }
-
-    .image-preview-container img {
-      width: 120px;
-      height: 120px;
-      border-radius: 5px;
-      object-fit: cover;
-      border: 2px solid #6C7A89;
-    }
-
-    .image-preview-container button {
-      margin-top: 10px; /* เพิ่มช่องว่างระหว่างรูปกับปุ่ม */
-      background-color: #6C7A89;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+      max-width: 250px;
+      margin: 10px auto;
+      border: 2px dashed #2CBFAE;
+      border-radius: 10px;
+      padding: 10px;
       cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.3s;
+      background: white;
+      color: #2CBFAE;
+      font-weight: bold;
+      transition: all 0.3s ease-in-out;
     }
-
-    .image-preview-container button:hover {
-      background-color: #A3C6C4;
+    .file-input:hover {
+      background-color: #cdeee5;
+      border-color: #2CBFAE;
+      transform: scale(1.08);
+    }
+    .file-input input {
+      opacity: 0;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ Tab Menu -->
   <div class="tabs">
     <a href="dashboard.html">Dashboard</a>
-    <a href="addCourse.html" class="active">Add Course</a>
+    <a href="addCourse.html">Add Course</a>
     <a href="#" id="logout">User Logout</a>
   </div>
 
-  <!-- ✅ Add Course Form -->
   <div class="form-container">
     <h2>Add New Course</h2>
     
@@ -141,11 +141,11 @@
       <label for="classroom-name">Classroom Name:</label>
       <input type="text" id="classroom-name" required>
 
-      <label for="course-image">Course Image (optional):</label>
-      <input type="file" id="course-image" accept="image/*">
-
-      <div class="image-preview-container">
-      <img id="preview" src="default-course.jpg" alt="Course Preview">
+      <label class="file-input">
+        Choose Course Image
+        <input type="file" id="course-image" accept="image/*">
+      </label>
+      
       <button type="submit">Save Course</button>
     </form>
   </div>
