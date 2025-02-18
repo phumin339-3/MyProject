@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #E0E7E9;
+    }
+    header {
+      background-color: #2CBFAE;
+      padding: 15px;
+      text-align: center;
+      color: white;
+      font-size: 24px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h2, h3 {
+      color: #333;
+    }
+    #user-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    #user-info img {
+      margin-right: 20px;
+      border-radius: 50%;
+    }
+    button {
+      padding: 8px 12px;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .edit-btn {
+      background-color:  #2CBFAE;
+      color: white;
+    }
+    .delete-btn {
+      background-color:  #41D3BD;
+      color: white;
+    }
+    button:hover {
+      opacity: 0.8; 
+      background-color: #E0E7E9;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .course-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .course-details {
+      flex-grow: 1;
+    }
+    img.course-image {
+      display: block;
+      margin-top: 5px;
+      width: 80px;
+      border-radius: 5px;
+    }
+    .menu-container {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+    }
+
+    .menu-button {
+      background-color: #E0E7E9;
+      border: none;
+      font-size: 24px;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: transform 0.3s ease-in-out, background-color 0.3s;
+    }
+
+    .menu-button:hover {
+      background-color: #d1d8e0;
+      transform: scale(1.1);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      flex-direction: column;
+      width: 150px;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+
+    .dropdown-menu.show {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dropdown-menu button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    }
+
+    .dropdown-menu button:hover {
+      background-color: #ddd;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dashboard</h1>
+  </header>
+
+  <div class="container">
+    <h2>Welcome to the Dashboard</h2>
+
+    <!-- ข้อมูลผู้ใช้ -->
+    <div id="user-info">
+      <img id="user-photo" src="" alt="Profile Picture" style="width: 100px; height: 100px;">
+      <div>
+        <p><strong>Name:</strong> <span id="user-name"></span></p>
+        <p><strong>Email:</strong> <span id="user-email"></span></p>
+      </div>
+    </div>
+
+    <!-- ไอคอนเมนู (hamburger) -->
+    <div class="menu-container">
+      <button id="menu-toggle" class="menu-button">☰</button>
+      <div id="dropdown-menu" class="dropdown-menu">
+        <button id="edit-profile-button">Edit Profile</button>
+        <button id="add-course-button">Add Course</button>
+        <button id="logout-button">Logout</button>
+      </div>
+    </div>
+    <!-- รายชื่อวิชาของผู้ใช้ -->
+    <h3>Your Courses</h3>
+    <ul id="course-list">
+      <!-- รายชื่อวิชาจะถูกแสดงที่นี่ -->
+    </ul>
+  </div>
+
+  <script type="module">
+    import { logout } from './firebase.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+    import { getDatabase, ref, get, remove } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+
+    const db = getDatabase();
+    const auth = getAuth();
+
+    // ✅ ตรวจสอบสถานะผู้ใช้ และโหลดข้อมูล
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // ✅ ดึงข้อมูลผู้ใช้
+            const userRef = ref(db, 'users/' + user.uid);
+            try {
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    document.getElementById('user-name').textContent = userData.name || 'N/A';
+                    document.getElementById('user-email').textContent = user.email || 'N/A';
+                    document.getElementById('user-photo').src = userData.photo || 'default-profile.jpg';
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+
+            // ✅ โหลดวิชาของผู้ใช้จาก Firebase
+            loadUserCourses(user.uid);
+        } else {
+            // ถ้าผู้ใช้ไม่ได้เข้าสู่ระบบ ให้กลับไปที่หน้า login
+            window.location.href = 'index.html';
+        }
+    });
+
+    // ✅ ฟังก์ชันโหลดคอร์ส
+    async function loadUserCourses(userId) {
+        const coursesRef = ref(db, `users/${userId}/classroom`);
+        try {
+            const snapshot = await get(coursesRef);
+            if (snapshot.exists()) {
+                const courses = snapshot.val();
+                const courseList = document.getElementById('course-list');
+                courseList.innerHTML = ''; // ล้างคอร์สเก่าออกก่อน
+
+                Object.keys(courses).forEach((cid) => {
+                    const courseItem = document.createElement('li');
+                    courseItem.classList.add('course-item');
+                    courseItem.innerHTML = `
+                        <div class="course-details">
+                          <strong>Course Name:</strong> ${courses[cid].name} <br>
+                          <strong>Classroom:</strong> ${courses[cid].classroom} <br>
+                          <img src="${courses[cid].image || 'default-course.jpg'}" alt="Course Image" class="course-image">
+                        </div>
+                        <div>
+                          <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
+                          <button class="delete-btn" onclick="deleteCourse('${userId}', '${cid}')">Delete</button>
+                        </div>
+                    `;
+                    courseList.appendChild(courseItem);
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching courses:", error);
+        }
+    }
+
+    // ✅ ฟังก์ชันลบคอร์ส
+    window.deleteCourse = async (userId, courseId) => {
+        if (confirm("Are you sure you want to delete this course?")) {
+            try {
+                await remove(ref(db, `users/${userId}/classroom/${courseId}`));
+                alert("Course deleted successfully!");
+                loadUserCourses(userId); // โหลดข้อมูลใหม่
+            } catch (error) {
+                console.error("Error deleting course:", error);
+            }
+        }
+    };
+
+    // ✅ ฟังก์ชันแก้ไขคอร์ส (นำไปใช้ในหน้า Edit Course)
+    window.editCourse = (courseId, courseName, classroomName) => {
+        localStorage.setItem('editCourseId', courseId);
+        localStorage.setItem('editCourseName', courseName);
+        localStorage.setItem('editClassroomName', classroomName);
+        window.location.href = 'editCourse.html'; // ไปที่หน้าแก้ไขคอร์ส
+    };
+
+    // ✅ ปุ่ม logout
+    document.getElementById('logout-button').addEventListener('click', logout);
+
+    // ✅ ปุ่มแก้ไขโปรไฟล์
+    document.getElementById('edit-profile-button').addEventListener('click', () => {
+        window.location.href = 'profile.html';
+    });
+
+    // ✅ ปุ่มเพิ่มวิชา
+    document.getElementById('add-course-button').addEventListener('click', () => {
+        window.location.href = 'addCourse.html';
+    });
+
+    document.getElementById("menu-toggle").addEventListener("click", function () {
+      const menu = document.getElementById("dropdown-menu");
+
+      if (menu.classList.contains("show")) {
+        menu.classList.remove("show");
+        setTimeout(() => {
+          menu.style.display = "none";
+        }, 300); // ให้เวลา animation ทำงานก่อนซ่อนจริงๆ
+      } else {
+        menu.style.display = "flex";
+        setTimeout(() => {
+          menu.classList.add("show");
+        }, 10); // เพิ่ม delay เล็กน้อยเพื่อให้ transition ทำงาน
+      }
+    });
+
+    // ปิดเมนูเมื่อคลิกข้างนอก
+    window.addEventListener("click", function (event) {
+      const menu = document.getElementById("dropdown-menu");
+      if (!event.target.matches("#menu-toggle") && menu.classList.contains("show")) {
+        menu.classList.remove("show");
+        setTimeout(() => {
+          menu.style.display = "none";
+        }, 300);
+      }
+    });
+  </script>
+</body>
+</html>
