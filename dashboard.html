@@ -158,6 +158,7 @@
       <div id="dropdown-menu" class="dropdown-menu">
         <button id="edit-profile-button">Edit Profile</button>
         <button id="add-course-button">Add Course</button>
+        <button id="question-button">question</button>
         <button id="logout-button">Logout</button>
       </div>
     </div>
@@ -266,6 +267,13 @@
     document.getElementById('add-course-button').addEventListener('click', () => {
         window.location.href = 'addCourse.html';
     });
+
+    // ✅ ปุ่มถามคำถาม
+    document.getElementById('question-button').addEventListener('click', () => {
+        window.location.href = 'askQuestion.html'; // เปลี่ยน URL ไปยังหน้าถามคำถามที่คุณต้องการ
+    });
+
+    
 
     document.getElementById("menu-toggle").addEventListener("click", function () {
       const menu = document.getElementById("dropdown-menu");
