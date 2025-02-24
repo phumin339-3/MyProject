@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-In Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #E0E7E9;
+    }
+
+    header {
+      background-color: #2CBFAE;
+      padding: 15px;
+      text-align: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .container {
+      padding: 20px;
+      margin: 20px;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      background-color: #2CBFAE;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    .back-button {
+      background-color: #E0E7E9;
+      color: #41D3BD;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Check-In Details</h1>
+  </header>
+
+  <div class="container">
+    <h2 id="person-name">Loading...</h2>
+    <p><strong>Check-In Time:</strong> <span id="checkin-time">Loading...</span></p>
+    <!--<p><strong>Course Name:</strong> <span id="course-name">Loading...</span></p>
+    <p><strong>Classroom Name:</strong> <span id="classroom-name">Loading...</span></p>-->
+    <p><strong>Course ID:</strong> <span id="course-id">Loading...</span></p>
+    <p><strong>Person ID:</strong> <span id="person-id">Loading...</span></p>
+    <p><strong>Role:</strong> <span id="role">Loading...</span></p>
+
+    <button id="go-back-button" class="back-button">Go Back</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
+    import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
+      authDomain: "myproject-9bc7e.firebaseapp.com",
+      projectId: "myproject-9bc7e",
+      storageBucket: "myproject-9bc7e.appspot.com",
+      messagingSenderId: "761031996090",
+      appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
+      measurementId: "G-YSGKSJG3ML"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const getCheckinDetails = async (courseId, personId) => {
+      const checkinRef = ref(db, 'checkins/' + courseId + '/' + personId);
+      const snapshot = await get(checkinRef);
+
+      if (snapshot.exists()) {
+        const checkinData = snapshot.val();
+        const checkinTime = new Date(checkinData.checkinTime);
+        document.getElementById('checkin-time').textContent = checkinTime.toLocaleString();
+      } else {
+        alert('No check-in data found for this person');
+        window.location.href = 'courseDetails.html?courseId=' + courseId;
+      }
+
+      // Fetch course details (name and classroom)
+      const courseRef = ref(db, 'courses/' + courseId);
+      const courseSnapshot = await get(courseRef);
+      if (courseSnapshot.exists()) {
+        const courseData = courseSnapshot.val();
+        document.getElementById('course-name').textContent = courseData.name || 'Course not available';
+        document.getElementById('classroom-name').textContent = courseData.classroom || 'Classroom not available';
+      } else {
+        alert('Course data not found');
+      }
+    };
+
+    const loadPersonDetails = async () => {
+      const courseId = new URLSearchParams(window.location.search).get('courseId');
+      const personId = new URLSearchParams(window.location.search).get('personId');
+
+      if (!courseId || !personId) {
+        alert('Course or Person ID missing.');
+        window.location.href = 'dashboard.html';
+      }
+
+      const personRef = ref(db, 'people/' + courseId + '/' + personId);
+      const personSnapshot = await get(personRef);
+
+      if (personSnapshot.exists()) {
+        const personData = personSnapshot.val();
+        document.getElementById('person-name').textContent = personData.name || 'Unknown Person';
+        document.getElementById('person-id').textContent = personId;
+        document.getElementById('role').textContent = personData.role || 'Role not assigned';
+        document.getElementById('course-id').textContent = courseId;
+        getCheckinDetails(courseId, personId);
+      } else {
+        alert('No person data found for this ID');
+        window.location.href = 'course.html?courseId=' + courseId;
+      }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadPersonDetails();
+      } else {
+        alert('Please log in to view details');
+        window.location.href = 'index.html';
+      }
+    });
+
+    document.getElementById('go-back-button').addEventListener('click', () => {
+      window.location.href = 'course.html?courseId=' + new URLSearchParams(window.location.search).get('courseId');
+    });
+
+  </script>
+
+</body>
+</html>

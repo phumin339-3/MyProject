@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #E0E7E9;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 10px 0;
+      position: relative;
+    }
+
+    .tabs a {
+      text-decoration: none;
+      color: #555;
+      padding: 10px 20px;
+      margin: 0 15px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tabs a.active {
+      color: #2CBFAE;
+    }
+
+    .tabs a:hover::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 100%;
+      height: 2px;
+      background-color: #2CBFAE;
+      transition: all 0.3s ease;
+    }
+
+    .container {
+      padding: 20px;
+      margin: 20px;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      opacity: 1;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .content {
+      display: none;
+    }
+
+    .content.active {
+      display: block;
+    }
+
+    header {
+      background-color: #2CBFAE;
+      padding: 15px;
+      text-align: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      padding: 8px 12px;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      background-color: #2CBFAE;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+    #add-question-button, #go-back-button, #add-people-button {
+      color: #41D3BD;
+    }
+
+    .menu-container {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+    }
+
+    .menu-button {
+      background-color: #E0E7E9;
+      border: none;
+      font-size: 24px;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: transform 0.3s ease-in-out, background-color 0.3s;
+    }
+
+    .menu-button:hover {
+      background-color: #d1d8e0;
+      transform: scale(1.1);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      width: 150px;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dropdown-menu button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    }
+
+    .dropdown-menu button:hover {
+      background-color: #ddd;
+      transform: scale(1.05);
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Course Details</h1>
+  </header>
+
+  <!-- แถบเมนู -->
+  <div class="tabs">
+    <a id="stream-tab" class="active">Stream</a>
+    <a id="work-tab">Work</a>
+    <a id="people-tab">People</a>
+  </div>
+
+  <!-- เมนู (hamburger) -->
+  <div class="menu-container">
+    <button id="menu-toggle" class="menu-button">☰</button>
+    <div id="dropdown-menu" class="dropdown-menu">
+      <button id="add-question-button">Add Question</button>
+      <button id="add-people-button">Add People</button>
+      <button id="go-back-button">Go Back</button>
+    </div>
+  </div>
+
+  <!-- แสดงข้อมูลคอร์ส -->
+  <div class="container">
+    <h2>Course Details</h2>
+    <div id="stream" class="content active">
+      <p>Stream Content</p>
+    </div>
+    <div id="work" class="content">
+      <h3>Work</h3>
+      <div id="questions-container"></div> 
+    </div>      
+    <div id="people" class="content">
+      <h3>People in this Course</h3>  
+      <div id="people-container"></div>
+</div>
+
+  </div>
+
+  <div class="container">
+    <h2 id="course-name">Loading...</h2>
+    <p id="course-classroom">Loading...</p>
+    <img id="course-image" src="" alt="Course Image" />
+    <!--<p><strong>Course ID:</strong> <span id="course-id"></span></p>-->
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+    import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+    import { remove } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+    import { set } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
+      authDomain: "myproject-9bc7e.firebaseapp.com",
+      projectId: "myproject-9bc7e",
+      storageBucket: "myproject-9bc7e.appspot.com",
+      messagingSenderId: "761031996090",
+      appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
+      measurementId: "G-YSGKSJG3ML"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+     // ฟังก์ชันในการโหลดข้อมูลคอร์ส
+    const loadCourseDetails = async (userId) => {
+      const courseId = getCourseIdFromUrl();
+      const courseRef = ref(db, `users/${userId}/classroom/${courseId}`);
+      try {
+        const snapshot = await get(courseRef);
+        if (snapshot.exists()) {
+          const courseData = snapshot.val();
+          document.getElementById('course-name').textContent = courseData.name;
+          document.getElementById('course-classroom').textContent = courseData.classroom;
+          document.getElementById('course-image').src = courseData.image || 'default-course.jpg';
+          document.getElementById('add-question-button').addEventListener("click", function() {
+            window.location.href = "askQuestion.html?courseId=" + courseId;
+          });
+
+          document.getElementById('add-people-button').addEventListener('click', () => {
+            const courseId = getCourseIdFromUrl();
+            window.location.href = `addPeople.html?courseId=${courseId}`;
+          });
+
+          // โหลดข้อมูลของ People
+          loadPeople(courseId);
+        } else {
+          alert('Course not found');
+          window.location.href = 'dashboard.html'; 
+        }
+      } catch (error) {
+        console.error('Error fetching course details:', error);
+      }
+    };
+
+    // ฟังก์ชันในการโหลดข้อมูลของ People
+    const loadPeople = async (courseId) => {
+      const peopleRef = ref(db, 'people/' + courseId);
+      const snapshot = await get(peopleRef);
+
+      if (snapshot.exists()) {
+        const peopleData = snapshot.val();
+        const peopleContainer = document.getElementById('people-container');
+        peopleContainer.innerHTML = ''; // Clear the current list
+
+        // Show People in the Course
+        for (let key in peopleData) {
+          const person = peopleData[key];
+          const personElement = document.createElement('div');
+          personElement.classList.add('person-item');
+          personElement.innerHTML = `
+            <h4>${person.name}</h4>
+            <p>Role: ${person.role || 'Not defined'}</p>
+            <div class="person-actions">
+              <button class="edit-button edit-button-people" data-id="${key}">Edit</button>
+              <button class="delete-button delete-button-people" data-id="${key}">Delete</button>
+              <button class="checkin-button" data-id="${key}" data-course-id="${courseId}">Check-In</button>
+
+            </div>
+          `;
+          peopleContainer.appendChild(personElement);
+        }
+         // ฟังก์ชันในการโหลดข้อมูลเช็คอินทั้งหมดที่เกี่ยวข้องกับ courseId
+        const loadCheckins = async () => {
+          const checkinRef = ref(db, 'checkins/' + courseId);
+          const snapshot = await get(checkinRef);
+
+          if (snapshot.exists()) {
+            const checkinData = snapshot.val();
+            const checkinListContainer = document.getElementById('checkin-list');
+            checkinListContainer.innerHTML = ''; // Clear previous data
+
+            // แสดงข้อมูลการเช็คอิน
+            for (let personId in checkinData) {
+              const checkin = checkinData[personId];
+              const checkinElement = document.createElement('div');
+              checkinElement.classList.add('checkin-item');
+              const checkinDate = new Date(checkin.checkinTime);
+              checkinElement.innerHTML = `
+                <p><strong>Person ID:</strong> ${personId}</p>
+                <p><strong>Checked In At:</strong> ${checkinDate.toLocaleString()}</p>
+              `;
+              checkinListContainer.appendChild(checkinElement);
+            }
+          } else {
+            console.log('No check-in data found');
+          }
+        };
+
+        loadCheckins(); // เรียกใช้ฟังก์ชันโหลดข้อมูลเช็คอิน
+        
+
+        // Add event listeners for Check-in
+        const checkinButtons = document.querySelectorAll('.checkin-button');
+        checkinButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const personId = this.getAttribute('data-id');
+            const courseId = this.getAttribute('data-course-id');
+            checkinPerson(personId, courseId);  // Call checkin function
+          });
+        });
+
+        const editButtons = document.querySelectorAll('.edit-button-people');
+        const deleteButtons = document.querySelectorAll('.delete-button-people');
+
+        editButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const personId = this.getAttribute('data-id');
+            editPerson(personId);  // Edit person
+          });
+        });
+
+        deleteButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const personId = this.getAttribute('data-id');
+            deletePerson(personId);  // Delete person
+          });
+        });
+      } else {
+        console.log("No people data found for this course");
+      }
+      // ฟังก์ชันสำหรับบันทึกข้อมูล Check-in
+      const checkinPerson = (personId, courseId) => {
+        const checkinRef = ref(db, 'checkins/' + courseId + '/' + personId);
+        const currentTime = new Date().toISOString();  // Get current time in ISO format
+
+        // Save the check-in data for the person
+        set(checkinRef, {
+          checkinTime: currentTime
+        }).then(() => {
+          console.log('Person checked in');
+          window.location.href = `checkin.html?courseId=${courseId}&personId=${personId}`;  // เพิ่ม personId ใน URL
+        }).catch((error) => {
+          console.error('Error checking in person:', error);
+        });
+      };
+    };
+
+
+      // ฟังก์ชันสำหรับแก้ไขคน
+      const editPerson = (personId) => {
+        const courseId = getCourseIdFromUrl();
+        window.location.href = `editPeople.html?courseId=${courseId}&personId=${personId}`;
+      };
+
+      // ฟังก์ชันสำหรับลบคน
+      const deletePerson = (personId) => {
+        const courseId = getCourseIdFromUrl();
+        const personRef = ref(db, 'people/' + courseId + '/' + personId);
+        remove(personRef)
+          .then(() => {
+            console.log('Person deleted');
+            loadPeople(courseId);  // Reload people after delete
+          })
+          .catch((error) => {
+            console.error('Error deleting person:', error);
+          });
+      };
+
+      // ฟังก์ชันดึง courseId จาก URL
+      const getCourseIdFromUrl = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('courseId');
+        if (!courseId) {
+          alert('No course selected');
+          window.location.href = 'dashboard.html'; 
+        }
+        return courseId;
+      };
+
+      const getPersonIdFromUrl = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const personId = urlParams.get('personId');
+        if (!personId) {
+          alert('No person selected');
+          window.location.href = 'people.html'; 
+        }
+        return personId;
+      };
+
+      // เรียกใช้เมื่อล็อกอินสำเร็จ
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          loadCourseDetails(user.uid);
+        } else {
+          alert('Please log in to view course details.');
+          window.location.href = 'index.html';
+        }
+      });
+
+    // ฟังก์ชันการเปิดหน้า "Add People"
+    const handleAddPeopleClick = () => {
+      const courseId = getCourseIdFromUrl();
+      window.location.href = `addPeople.html?courseId=${courseId}`;
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('User is logged in:', user);
+        loadCourseDetails(user.uid);
+      } else {
+        console.log('No user is logged in');
+        alert('Please log in to view course details.');
+        window.location.href = 'index.html'; 
+      }
+    });
+
+    document.getElementById('go-back-button').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+
+    document.getElementById("menu-toggle").addEventListener("click", function() {
+      const menu = document.getElementById("dropdown-menu");
+      menu.classList.toggle("show");
+    });
+
+    function showTab(tabName) {
+      const contents = document.querySelectorAll('.content');
+      contents.forEach(content => content.classList.remove('active'));
+
+      const selectedTabContent = document.getElementById(tabName);
+      selectedTabContent.classList.add('active');
+
+      const tabs = document.querySelectorAll('.tabs a');
+      tabs.forEach(tab => tab.classList.remove('active'));
+
+      const selectedTab = document.getElementById(tabName + '-tab');
+      selectedTab.classList.add('active');
+    }
+
+    document.getElementById("stream-tab").addEventListener("click", () => showTab('stream'));
+    document.getElementById("work-tab").addEventListener("click", () => showTab('work'));
+    document.getElementById("people-tab").addEventListener("click", () => showTab('people'));
+
+    showTab('stream');
+
+    // ฟังก์ชันการโหลดคำถาม
+    const loadQuestions = async () => {
+  const courseId = getCourseIdFromUrl();
+  const questionsRef = ref(db, 'questions/' + courseId);
+  const snapshot = await get(questionsRef);
+
+  if (snapshot.exists()) {
+    const questionsData = snapshot.val();
+    const questionsContainer = document.getElementById('questions-container');
+    questionsContainer.innerHTML = ''; // Clear previous questions
+
+    // Show Questions for Work
+    for (let key in questionsData) {
+      const question = questionsData[key];
+      const questionElement = document.createElement('div');
+      questionElement.classList.add('question-item');
+      questionElement.innerHTML = `
+        <h3>${question.title}</h3>
+        <p>${question.details}</p>
+        <small>${question.timestamp}</small>
+        <div class="question-actions">
+          <button class="edit-button edit-button-work" data-id="${key}">Edit</button>
+          <button class="delete-button delete-button-work" data-id="${key}">Delete</button>
+        </div>
+      `;
+      questionsContainer.appendChild(questionElement);
+    }
+
+    // Add event listeners for Edit and Delete Work
+    const editButtons = document.querySelectorAll('.edit-button-work');
+    const deleteButtons = document.querySelectorAll('.delete-button-work');
+
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const questionId = this.getAttribute('data-id');
+        editQuestion(questionId);  // Edit question
+      });
+    });
+
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const questionId = this.getAttribute('data-id');
+        deleteQuestion(questionId);  // Delete question
+      });
+    });
+  } else {
+    console.log("No questions found for this course");
+  }
+};
+
+
+    // ฟังก์ชันสำหรับแก้ไขคำถาม
+    const editQuestion = (questionId) => {
+      const courseId = getCourseIdFromUrl();
+      window.location.href = `editWork.html?courseId=${courseId}&questionId=${questionId}`;
+    };
+
+
+    // ฟังก์ชันสำหรับลบคำถาม
+    const deleteQuestion = (questionId) => {
+      const courseId = getCourseIdFromUrl();
+      const questionRef = ref(db, 'questions/' + courseId + '/' + questionId);
+      remove(questionRef)
+        .then(() => {
+          console.log('Question deleted');
+          loadQuestions();  // โหลดคำถามใหม่หลังจากลบ
+        })
+        .catch((error) => {
+          console.error('Error deleting question:', error);
+        });
+    };
+
+
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadCourseDetails(user.uid);
+        loadQuestions();
+      } else {
+        alert('Please log in to view course details.');
+        window.location.href = 'index.html';
+      }
+    });
+
+    // ฟังก์ชันแสดง/ซ่อนข้อมูลคอร์ส
+    function toggleCourseDetails(tabName) {
+      const courseDetails = document.getElementById('course-details');
+      
+      // ซ่อนข้อมูลคอร์สเมื่อไปที่แท็บ Work หรือ People
+      if (tabName === 'work' || tabName === 'people') {
+        courseDetails.style.display = 'none';
+      } else {
+        courseDetails.style.display = 'block';
+      }
+    }
+
+    // ปรับการเลือกแท็บเมื่อคลิก
+    document.getElementById("stream-tab").addEventListener("click", () => {
+      showTab('stream');
+      toggleCourseDetails('stream');  // แสดงข้อมูลคอร์สเมื่อเลือก Stream
+    });
+    document.getElementById("work-tab").addEventListener("click", () => {
+      showTab('work');
+      toggleCourseDetails('work');    // ซ่อนข้อมูลคอร์สเมื่อเลือก Work
+    });
+    document.getElementById("people-tab").addEventListener("click", () => {
+      showTab('people');
+      toggleCourseDetails('people');  // ซ่อนข้อมูลคอร์สเมื่อเลือก People
+    });
+
+  </script>
+</body>
+</html>

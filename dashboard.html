@@ -158,7 +158,7 @@
       <div id="dropdown-menu" class="dropdown-menu">
         <button id="edit-profile-button">Edit Profile</button>
         <button id="add-course-button">Add Course</button>
-        <button id="question-button">question</button>
+        <!--<button id="question-button">question</button>-->
         <button id="logout-button">Logout</button>
       </div>
     </div>
@@ -202,6 +202,7 @@
         }
     });
 
+
     // ✅ ฟังก์ชันโหลดคอร์ส
     async function loadUserCourses(userId) {
         const coursesRef = ref(db, `users/${userId}/classroom`);
@@ -224,6 +225,7 @@
                         <div>
                           <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
                           <button class="delete-btn" onclick="deleteCourse('${userId}', '${cid}')">Delete</button>
+                          <button class="go-to-course-btn" onclick="goToCourse('${cid}')">Go to Course</button>
                         </div>
                     `;
                     courseList.appendChild(courseItem);
@@ -233,6 +235,8 @@
             console.error("Error fetching courses:", error);
         }
     }
+
+
 
     // ✅ ฟังก์ชันลบคอร์ส
     window.deleteCourse = async (userId, courseId) => {
@@ -247,6 +251,7 @@
         }
     };
 
+
     // ✅ ฟังก์ชันแก้ไขคอร์ส (นำไปใช้ในหน้า Edit Course)
     window.editCourse = (courseId, courseName, classroomName) => {
         localStorage.setItem('editCourseId', courseId);
@@ -255,8 +260,18 @@
         window.location.href = 'editCourse.html'; // ไปที่หน้าแก้ไขคอร์ส
     };
 
+    // ฟังก์ชันไปที่หน้า Course
+        window.goToCourse = (courseId) => {
+        // ส่ง courseId ผ่าน URL
+        window.location.href = `course.html?courseId=${courseId}`;
+    };
+
+
+
+
     // ✅ ปุ่ม logout
     document.getElementById('logout-button').addEventListener('click', logout);
+
 
     // ✅ ปุ่มแก้ไขโปรไฟล์
     document.getElementById('edit-profile-button').addEventListener('click', () => {
@@ -269,10 +284,10 @@
     });
 
     // ✅ ปุ่มถามคำถาม
-    document.getElementById('question-button').addEventListener('click', () => {
-        window.location.href = 'askQuestion.html'; 
-    });
-
+    //document.getElementById('question-button').addEventListener('click', () => {
+        //window.location.href = 'askQuestion.html'; 
+    //});
+    
     
 
     document.getElementById("menu-toggle").addEventListener("click", function () {

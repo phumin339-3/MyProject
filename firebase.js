@@ -1,4 +1,3 @@
-// firebase.js - แก้ไขโค้ดให้รองรับการอัปโหลดไฟล์และบันทึกข้อมูลอย่างถูกต้อง
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
 import { getDatabase, ref, set, get, update as dbUpdate } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
@@ -16,11 +15,11 @@ const firebaseConfig = {
 };
 
 // ✅ Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);  // Initialization done once
+const auth = getAuth(app);  // Use initialized app
 const provider = new GoogleAuthProvider();
-const database = getDatabase(app);
-const storage = getStorage(app);
+const database = getDatabase(app);  // Use initialized app
+const storage = getStorage(app);  // Use initialized app
 
 /**
  * ✅ ฟังก์ชันสำหรับบันทึกคอร์สไปยัง Firebase Realtime Database และอัปโหลดรูปภาพไปยัง Firebase Storage
@@ -148,6 +147,7 @@ export const logout = () => {
 
 // ✅ ตรวจสอบสถานะผู้ใช้
 onAuthStateChanged(auth, (user) => {
+    console.log('Auth state changed:', user);  // ตรวจสอบสถานะผู้ใช้
     if (user) {
         console.log('User is logged in:', user);
     } else {
