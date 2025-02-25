@@ -146,7 +146,7 @@
       </label>
       
       <button type="submit">Save Course</button>
-      <button id="cancel-button">Cancel</button>
+      <!--<button id="cancel-button">Cancel</button>-->
     </form>
   </div>
 
@@ -181,7 +181,7 @@
       }
     });
 
-    document.getElementById("cancel-button").addEventListener("click", function() {
+    //document.getElementById("cancel-button").addEventListener("click", function() {
     // ดึง courseId จาก URL
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get("courseId");  // ดึงค่า courseId
