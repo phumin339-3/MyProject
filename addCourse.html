@@ -146,97 +146,98 @@
       </label>
       
       <button type="submit">Save Course</button>
-      <!--<button id="cancel-button">Cancel</button>-->
+      <button id="cancel-button">Cancel</button>
     </form>
   </div>
 
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
-  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
-  import { getDatabase, ref, set, push } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+    import { getDatabase, ref, set, push } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
-    authDomain: "myproject-9bc7e.firebaseapp.com",
-    databaseURL: "https://myproject-9bc7e-default-rtdb.firebaseio.com/",
-    appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
+      authDomain: "myproject-9bc7e.firebaseapp.com",
+      databaseURL: "https://myproject-9bc7e-default-rtdb.firebaseio.com/",
+      appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-  
-  const form = document.getElementById('add-course-form');
-  let base64Image = "";
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    
+    const form = document.getElementById('add-course-form');
+    let base64Image = "";
 
-  // 📌 แสดงตัวอย่างรูปภาพที่เลือก
-  document.getElementById('course-image').addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        base64Image = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    // 📌 แสดงตัวอย่างรูปภาพที่เลือก
+    document.getElementById('course-image').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          base64Image = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById("cancel-button").addEventListener("click", function() {
+    // ดึง courseId จาก URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get("courseId");  // ดึงค่า courseId
+
+    // ตรวจสอบว่าได้รับ courseId หรือไม่
+    if (courseId) {
+      // ถ้ามี courseId, ไปที่หน้า course.html และส่ง courseId
+      window.location.href = `course.html?courseId=${courseId}`;
+    } else {
+      // ถ้าไม่มี courseId, ไปที่หน้า dashboard
+      window.location.href = "dashboard.html";
     }
   });
 
-  // ปุ่ม Cancel ถูกเอาออกไปแล้ว
-  // แต่ยังคงโค้ดในการจัดการกับ courseId
-  const urlParams = new URLSearchParams(window.location.search);
-  const courseId = urlParams.get("courseId");  // ดึงค่า courseId
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+      }
+    });
 
-  if (courseId) {
-    // ถ้ามี courseId, ไปที่หน้า course.html และส่ง courseId
-    window.location.href = `course.html?courseId=${courseId}`;
-  } else {
-    // ถ้าไม่มี courseId, ไปที่หน้า dashboard
-    window.location.href = "dashboard.html";
+    const saveCourse = async (courseName, classroomName) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const courseRef = ref(db, `users/${user.uid}/classroom`);
+    const newCourseRef = push(courseRef); // Firebase สร้าง ID อัตโนมัติ
+    const courseId = newCourseRef.key; // ได้รับ courseId
+
+    // บันทึกข้อมูลคอร์สรวมถึง courseId
+    await set(newCourseRef, {
+      courseId: courseId, // เก็บ courseId
+      name: courseName,
+      classroom: classroomName,
+      image: base64Image || 'default-image.jpg', // หากไม่มีภาพเลือก
+    });
+
+    alert('Course saved successfully!');
+    window.location.replace('dashboard.html'); 
+  } catch (error) {
+    console.error('Error saving course:', error);
+    alert('Error saving course: ' + error.message);
   }
+};
 
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const courseName = document.getElementById('course-name').value;
+      const classroomName = document.getElementById('classroom-name').value;
+      await saveCourse(courseName, classroomName);
+    });
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await signOut(auth);
       window.location.replace('index.html');
-    }
-  });
-
-  const saveCourse = async (courseName, classroomName) => {
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const courseRef = ref(db, `users/${user.uid}/classroom`);
-      const newCourseRef = push(courseRef); // Firebase สร้าง ID อัตโนมัติ
-      const courseId = newCourseRef.key; // ได้รับ courseId
-
-      // บันทึกข้อมูลคอร์สรวมถึง courseId
-      await set(newCourseRef, {
-        courseId: courseId, // เก็บ courseId
-        name: courseName,
-        classroom: classroomName,
-        image: base64Image || 'default-image.jpg', // หากไม่มีภาพเลือก
-      });
-
-      alert('Course saved successfully!');
-      window.location.replace('dashboard.html'); 
-    } catch (error) {
-      console.error('Error saving course:', error);
-      alert('Error saving course: ' + error.message);
-    }
-  };
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const courseName = document.getElementById('course-name').value;
-    const classroomName = document.getElementById('classroom-name').value;
-    await saveCourse(courseName, classroomName);
-  });
-
-  document.getElementById('logout').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.replace('index.html');
-  });
-</script>
-
+    });
+  </script>
 </body>
 </html>
