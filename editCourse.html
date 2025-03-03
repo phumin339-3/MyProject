@@ -117,7 +117,13 @@
     }
     button {
     margin-top: 20px;
-    }    
+    }
+    .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* เพิ่มระยะห่างระหว่างปุ่ม */
+    margin-top: 30px; /* เว้นระยะห่างจากรูปภาพ */
+}
   </style>
 </head>
 <body>
@@ -140,11 +146,13 @@
       <input type="text" id="classroom-name" required>
 
       <label class="file-input">
-    Change Course Image
+      Change Course Image
       <input type="file" id="course-image" accept="image/*">
       </label>
       <img id="preview-image" src="default-course.jpg" alt="Course Image Preview" style="width: 150px; height: auto; margin-top: 10px;">
 
+      <!-- เพิ่ม container สำหรับปุ่ม -->
+      <div class="button-container">
       <button type="submit">Save Changes</button>
       <button type="button" id="back-to-dashboard">Back to Dashboard</button>
     </form>
