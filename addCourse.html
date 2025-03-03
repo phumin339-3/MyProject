@@ -169,17 +169,17 @@
     let base64Image = "";
 
     // 📌 แสดงตัวอย่างรูปภาพที่เลือก
-    document.getElementById('course-image').addEventListener('change', (event) => {
+     document.getElementById('course-image').addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          base64Image = e.target.result;
-        };
-        reader.readAsDataURL(file);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+              base64Image = e.target.result;
+              console.log('Base64 Image:', base64Image); // เพิ่มบรรทัดนี้เพื่อตรวจสอบค่า
+          };
+          reader.readAsDataURL(file);
       }
     });
-
   
     // ดึง courseId จาก URL
     const urlParams = new URLSearchParams(window.location.search);
