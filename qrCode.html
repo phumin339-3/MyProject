@@ -23,9 +23,11 @@
         function generateQRCode(courseId) {
             const qrcodeDiv = document.getElementById("qrcode");
             qrcodeDiv.innerHTML = ""; // Clear previous QR Code
-
+        
+            const fullUrl = `https://phumin339-3.github.io/MyProject/course.html?courseId=${courseId}`; // ใช้ URL แบบเต็ม
+        
             const qrcode = new QRCode(qrcodeDiv, {
-                text: `course.html?courseId=${courseId}`, // Link to course page
+                text: fullUrl, // เปลี่ยนเป็น URL แบบเต็ม
                 width: 256,
                 height: 256,
                 colorDark : "#000",
