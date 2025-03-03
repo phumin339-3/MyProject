@@ -12,59 +12,6 @@
       background-color: #E0E7E9;
     }
 
-    .tabs {
-      display: flex;
-      justify-content: center;
-      background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      padding: 10px 0;
-      position: relative;
-    }
-
-    .tabs a {
-      text-decoration: none;
-      color: #555;
-      padding: 10px 20px;
-      margin: 0 15px;
-      font-weight: bold;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .tabs a.active {
-      color: #2CBFAE;
-    }
-
-    .tabs a:hover::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -5px;
-      width: 100%;
-      height: 2px;
-      background-color: #2CBFAE;
-      transition: all 0.3s ease;
-    }
-
-    .container {
-      padding: 20px;
-      margin: 20px;
-      background-color: white;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      opacity: 1;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .content {
-      display: none;
-    }
-
-    .content.active {
-      display: block;
-    }
-
     header {
       background-color: #2CBFAE;
       padding: 15px;
@@ -79,6 +26,7 @@
       padding: 20px;
       background-color: white;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
     }
 
     button {
@@ -95,91 +43,55 @@
     button:hover {
       opacity: 0.8;
     }
-    #add-question-button, #go-back-button, #add-people-button {
-      color: #41D3BD;
+
+    .attendance-section {
+      margin-top: 20px;
     }
 
-    .menu-container {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-    }
-
-    .menu-button {
-      background-color: #E0E7E9;
-      border: none;
-      font-size: 24px;
-      padding: 10px;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: transform 0.3s ease-in-out, background-color 0.3s;
-    }
-
-    .menu-button:hover {
-      background-color: #d1d8e0;
-      transform: scale(1.1);
-    }
-
-    .dropdown-menu {
+    #attendance-form {
+      margin-top: 20px;
       display: none;
-      position: absolute;
-      right: 0;
-      top: 50px;
-      background: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 5px;
-      width: 150px;
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
     }
 
-    .dropdown-menu.show {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
+    #attendance-list {
+      margin-top: 20px;
+      display: none;
     }
-
-    .dropdown-menu button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      background: none;
-      text-align: left;
-      cursor: pointer;
-      transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
-    }
-
-    .dropdown-menu button:hover {
-      background-color: #ddd;
-      transform: scale(1.05);
-    }
-
   </style>
 </head>
 <body>
   <header>
-    <h1>Course Details</h1>
+    <h1>รายละเอียดคอร์ส</h1>
   </header>
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Attendance</title>
-</head>
-<body>
-  <h1>Attendance</h1>
-  <div id="course-info">
-    <!-- ข้อมูลวิชาจะถูกแสดงที่นี่ -->
+
+  <div class="container">
+    <h2>ข้อมูลวิชา</h2>
+    <div id="course-info">
+      <!-- ข้อมูลวิชาจะถูกแสดงที่นี่ -->
+    </div>
+
+    <div class="attendance-section">
+      <button id="open-attendance-btn">เปิดการเช็คชื่อ</button>
+      <button id="close-attendance-btn" style="display:none;">ปิดการเช็คชื่อ</button>
+      <button id="show-attendance-btn" style="display:none;">แสดงรายชื่อ</button>
+    </div>
+
+    <!-- ฟอร์มการเช็คชื่อ -->
+    <form id="attendance-form">
+      <label for="status">สถานะ:</label>
+      <select id="status" name="status">
+        <option value="present">มาที่เรียน</option>
+        <option value="absent">ไม่มาที่เรียน</option>
+        <option value="excused">ขออนุญาต</option>
+      </select>
+      <button type="submit">บันทึก</button>
+    </form>
+
+    <!-- แสดงรายชื่อผู้ที่เช็คชื่อ -->
+    <div id="attendance-list">
+      <!-- รายชื่อผู้ที่เข้าร่วมการเช็คชื่อจะถูกแสดงที่นี่ -->
+    </div>
   </div>
-  <form id="attendance-form">
-    <label for="status">Status:</label>
-    <select id="status" name="status">
-      <option value="present">Present</option>
-      <option value="absent">Absent</option>
-      <option value="excused">Excused</option>
-    </select>
-    <button type="submit">Save</button>
-  </form>
 
   <script type="module">
     import { getAuth } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
@@ -188,7 +100,7 @@
     const auth = getAuth();
     const db = getDatabase();
 
-    // ✅ ฟังก์ชันดึงค่าจาก URL
+    // ฟังก์ชันดึงค่าจาก URL
     function getParameterByName(name, url = window.location.href) {
       name = name.replace(/[\[\]]/g, '\\$&');
       var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
@@ -201,41 +113,87 @@
     const courseId = getParameterByName('courseId');
     const userId = auth.currentUser ? auth.currentUser.uid : null;
 
-    // ✅ ตรวจสอบว่ามี courseId และ userId
+    // ตรวจสอบว่ามี courseId และ userId
     if (!courseId || !userId) {
-      alert('Course ID or User ID not found!');
+      alert('ไม่พบ Course ID หรือ User ID');
     } else {
-      // ✅ ดึงข้อมูลวิชาจาก Firebase
-      const courseRef = ref(db, `courses/${courseId}`); // ⚠️ เปลี่ยน path ตามโครงสร้างข้อมูลจริงของคุณ
+      // ดึงข้อมูลวิชาจาก Firebase
+      const courseRef = ref(db, `courses/${courseId}`);
       get(courseRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
             const courseData = snapshot.val();
             document.getElementById('course-info').innerHTML = `
-              <h2>${courseData.name}</h2>
-              <p>Classroom: ${courseData.classroom}</p>
+              <h3>${courseData.name}</h3>
+              <p>ห้องเรียน: ${courseData.classroom}</p>
             `;
           } else {
-            console.log('No data available');
+            console.log('ไม่พบข้อมูลวิชา');
           }
         })
         .catch((error) => {
           console.error(error);
         });
 
-      // ✅ บันทึกข้อมูลการเช็คชื่อ
+      // เปิดและปิดการเช็คชื่อ
+      const openAttendanceBtn = document.getElementById('open-attendance-btn');
+      const closeAttendanceBtn = document.getElementById('close-attendance-btn');
+      const showAttendanceBtn = document.getElementById('show-attendance-btn');
+      const attendanceForm = document.getElementById('attendance-form');
+      const attendanceList = document.getElementById('attendance-list');
+
+      openAttendanceBtn.addEventListener('click', () => {
+        openAttendanceBtn.style.display = 'none';
+        closeAttendanceBtn.style.display = 'inline-block';
+        showAttendanceBtn.style.display = 'inline-block';
+        attendanceForm.style.display = 'block';
+      });
+
+      closeAttendanceBtn.addEventListener('click', () => {
+        openAttendanceBtn.style.display = 'inline-block';
+        closeAttendanceBtn.style.display = 'none';
+        showAttendanceBtn.style.display = 'none';
+        attendanceForm.style.display = 'none';
+      });
+
+      showAttendanceBtn.addEventListener('click', () => {
+        attendanceList.style.display = 'block';
+        // ดึงข้อมูลการเช็คชื่อจาก Firebase
+        const attendanceRef = ref(db, `attendances/${courseId}`);
+        get(attendanceRef)
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              const attendanceData = snapshot.val();
+              let listHTML = '<ul>';
+              for (let date in attendanceData) {
+                for (let user in attendanceData[date]) {
+                  listHTML += `<li>${user}: ${attendanceData[date][user]}</li>`;
+                }
+              }
+              listHTML += '</ul>';
+              attendanceList.innerHTML = listHTML;
+            } else {
+              attendanceList.innerHTML = 'ไม่มีการเช็คชื่อ';
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      });
+
+      // บันทึกข้อมูลการเช็คชื่อ
       document.getElementById('attendance-form').addEventListener('submit', (event) => {
         event.preventDefault();
-        const status = document.getElementById('status').value;
-        const today = new Date().toLocaleDateString(); // หรือใช้รูปแบบวันที่ที่คุณต้องการ
+        const status = document.getElementById('status').value();
+        const today = new Date().toLocaleDateString();
 
         const attendanceRef = ref(db, `attendances/${courseId}/${userId}/${today}`);
         set(attendanceRef, status)
           .then(() => {
-            alert('Attendance saved!');
+            alert('บันทึกการเช็คชื่อเรียบร้อย!');
           })
           .catch((error) => {
-            console.error('Error saving attendance:', error);
+            console.error('เกิดข้อผิดพลาดในการบันทึก:', error);
           });
       });
     }
