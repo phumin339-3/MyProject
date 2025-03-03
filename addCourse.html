@@ -229,14 +229,16 @@
       window.location.replace('index.html');
     });
 
-    const previewImage = document.getElementById('preview-image');
+    // 📌 แสดงตัวอย่างรูปภาพที่เลือกและอัปเดตค่า base64Image
+const previewImage = document.getElementById('preview-image');
 document.getElementById('course-image').addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
             base64Image = e.target.result;
-            previewImage.src = base64Image; // ✅ แสดงภาพตัวอย่าง
+            previewImage.src = base64Image; // ✅ อัปเดตภาพตัวอย่างทันที
+            console.log('Base64 Image:', base64Image); // ✅ ตรวจสอบค่า Base64
         };
         reader.readAsDataURL(file);
     }
