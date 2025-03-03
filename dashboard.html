@@ -45,6 +45,7 @@
       border-radius: 5px;
       font-size: 14px;
     }
+    
     .edit-btn {
       background-color:  #2CBFAE;
       color: white;
@@ -60,6 +61,10 @@
     }
     .quiz-btn {
       background-color: #EC407A;
+      color: white;
+    }
+    .QR-Code-btn {
+      background-color: #673AB7; 
       color: white;
     }
 
@@ -108,6 +113,8 @@
       transform: scale(1.1);
     }
 
+    
+
     .dropdown-menu {
       display: none;
       position: absolute;
@@ -143,6 +150,8 @@
       background-color: #ddd;
       transform: scale(1.05);
     }
+    
+   
   </style>
 </head>
 <body>
@@ -172,6 +181,7 @@
         <button id="logout-button">Logout</button>
       </div>
     </div>
+
     <!-- รายชื่อวิชาของผู้ใช้ -->
     <h3>Your Courses</h3>
     <ul id="course-list">
@@ -233,6 +243,7 @@
                           <img src="${courses[cid].imageUrl || 'default-course.jpg'}" alt="Course Image" class="course-image">
                         </div>
                         <div>
+                          <button class="QR-Code-btn" onclick="QRCode('${cid}')">QR Code</button>
                           <button class="attendance-btn" onclick="takeAttendance('${cid}')">Check Attendance</button>
                           <button class="quiz-btn" onclick="takeQuiz('${cid}')">Take Quiz</button>
                           <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
@@ -263,10 +274,16 @@
         }
     };
 
-      // ฟังก์ชันไปที่หน้า Course
-      window.goToCourse = (courseId) => {
+    // ✅ ฟังก์ชันไปที่หน้า Course
+    window.goToCourse = (courseId) => {
         // ส่ง courseId ผ่าน URL
         window.location.href = `course.html?courseId=${courseId}`;
+    };
+
+    // ✅ ปุ่มสร้าง QR Code
+    window.QRCode = (courseId) => {
+        // เปิดหน้าต่างใหม่หรือแสดง modal เพื่อสร้าง QR Code
+        window.location.href = `qrCode.html?courseId=${courseId}`;
     };
 
     // ✅ ฟังก์ชันเช็คชื่อ

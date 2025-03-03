@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>สร้าง QR Code</title>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>สร้าง QR Code</h1>
+    <div id="qrcode"></div>
+
+    <script>
+        // Function to extract query parameters from URL
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        // Function to generate QR code
+        function generateQRCode(courseId) {
+            const qrcodeDiv = document.getElementById("qrcode");
+            qrcodeDiv.innerHTML = ""; // Clear previous QR Code
+
+            const qrcode = new QRCode(qrcodeDiv, {
+                text: `course.html?courseId=${courseId}`, // Link to course page
+                width: 256,
+                height: 256,
+                colorDark : "#000",
+                colorLight : "#fff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        // Get courseId from URL and generate QR code
+        document.addEventListener('DOMContentLoaded', () => {
+            const courseId = getParameterByName('courseId');
+            if (courseId) {
+                generateQRCode(courseId);
+            } else {
+                document.getElementById("qrcode").innerText = "Course ID not found.";
+            }
+        });
+    </script>
+</body>
+</html>
