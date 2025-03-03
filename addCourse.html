@@ -118,6 +118,11 @@
       height: 100%;
       cursor: pointer;
     }
+    .button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px; /* เพิ่มระยะห่างจากรูปภาพ */
+    }
   </style>
 </head>
 </head>
@@ -146,6 +151,8 @@
       </label>
       <img id="preview-image" src="default-course.jpg" alt="Course Image Preview" style="width: 150px; height: auto; margin-top: 10px;">
 
+      <!-- ใช้ div แยกปุ่มออกมา และเพิ่มคลาส .button-container -->
+      <div class="button-container">
       <button type="submit">Save Course</button>
     </form>
   </div>
