@@ -227,23 +227,24 @@
     const auth = getAuth(app);
 
      // ฟังก์ชันในการโหลดข้อมูลคอร์ส
-    const loadCourseDetails = async (userId, courseId) => {
-    const courseRef = ref(db, `users/${userId}/classroom/${courseId}`);
-    try {
+    const loadCourseDetails = async (userId) => {
+      const courseId = getCourseIdFromUrl();
+      const courseRef = ref(db, `users/${userId}/classroom/${courseId}`);
+      try {
         const snapshot = await get(courseRef);
         if (snapshot.exists()) {
-            const courseData = snapshot.val();
-            document.getElementById('course-name').textContent = courseData.name || 'ไม่พบชื่อคอร์ส';
-            document.getElementById('course-classroom').textContent = courseData.classroom || 'ไม่พบชื่อห้องเรียน';
-            document.getElementById('course-image').src = courseData.image || 'default-course.jpg';
-        } else {
-            alert('ไม่พบคอร์สนี้');
-            window.location.href = 'dashboard.html'; 
-        }
-    } catch (error) {
-        console.error('Error fetching course details:', error);
-    }
-};
+          const courseData = snapshot.val();
+          document.getElementById('course-name').textContent = courseData.name;
+          document.getElementById('course-classroom').textContent = courseData.classroom;
+          document.getElementById('course-image').src = courseData.image || 'default-course.jpg';
+          document.getElementById('add-question-button').addEventListener("click", function() {
+            window.location.href = "askQuestion.html?courseId=" + courseId;
+          });
+
+          document.getElementById('add-people-button').addEventListener('click', () => {
+            const courseId = getCourseIdFromUrl();
+            window.location.href = `addPeople.html?courseId=${courseId}`;
+          });
 
           // โหลดข้อมูลของ People
           loadPeople(courseId);
@@ -385,8 +386,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const courseId = urlParams.get('courseId');
         if (!courseId) {
-            alert('ไม่พบ ID คอร์สใน URL');
-            window.location.href = 'dashboard.html'; 
+          alert('No course selected');
+          window.location.href = 'dashboard.html'; 
         }
         return courseId;
       };
@@ -566,38 +567,6 @@
       showTab('people');
       toggleCourseDetails('people');  // ซ่อนข้อมูลคอร์สเมื่อเลือก People
     });
-
-    onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const courseId = getCourseIdFromUrl();
-
-        if (courseId) {
-            // ตรวจสอบว่า user มีคอร์สนี้ใน Firebase หรือไม่
-            const userCourseRef = ref(db, `users/${user.uid}/classroom/${courseId}`);
-            const snapshot = await get(userCourseRef);
-
-            if (!snapshot.exists()) {
-                // ถ้า user ยังไม่ได้เข้าร่วมคอร์สนี้ ให้เพิ่มข้อมูลคอร์สเข้าในบัญชีของ user
-                await set(userCourseRef, {
-                    name: 'Course Name', // ควรดึงจากข้อมูลคอร์สจริง
-                    classroom: 'Classroom Name', // ควรดึงจากข้อมูลจริงเช่นกัน
-                    image: 'default-course.jpg' // รูปภาพคอร์ส
-                });
-                alert('คุณได้เข้าร่วมคอร์สนี้เรียบร้อยแล้ว');
-            }
-
-            // โหลดข้อมูลคอร์ส
-            loadCourseDetails(user.uid, courseId);
-        } else {
-            alert('ไม่พบ ID คอร์สใน URL');
-            window.location.href = 'dashboard.html';
-        }
-    } else {
-        alert('กรุณาเข้าสู่ระบบก่อนเข้าคอร์ส');
-        window.location.href = 'index.html';
-    }
-});
-
 
   </script>
 </body>
