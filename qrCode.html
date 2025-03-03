@@ -1,12 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>สร้าง QR Code</title>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <style>
+        /* จัดพื้นหลังและตำแหน่งให้ QR Code อยู่กลางจอ */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #E0E7E9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #2CBFAE;
+            margin-bottom: 20px;
+        }
+
+        #qrcode-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-    <h1>สร้าง QR Code</h1>
-    <div id="qrcode"></div>
+    <div id="qrcode-container">
+        <h1>QR Code</h1>
+        <div id="qrcode"></div>
+    </div>
 
     <script>
         // Function to extract query parameters from URL
@@ -24,10 +55,10 @@
             const qrcodeDiv = document.getElementById("qrcode");
             qrcodeDiv.innerHTML = ""; // Clear previous QR Code
         
-            const fullUrl = `https://phumin339-3.github.io/MyProject/course.html?courseId=${courseId}`; // ใช้ URL แบบเต็ม
+            const fullUrl = `https://phumin339-3.github.io/MyProject/course.html?courseId=${courseId}`;
         
-            const qrcode = new QRCode(qrcodeDiv, {
-                text: fullUrl, // เปลี่ยนเป็น URL แบบเต็ม
+            new QRCode(qrcodeDiv, {
+                text: fullUrl,
                 width: 256,
                 height: 256,
                 colorDark : "#000",
