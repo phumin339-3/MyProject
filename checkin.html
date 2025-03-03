@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,23 +47,6 @@
       background-color: #E0E7E9;
       color: #41D3BD;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    table, th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #2CBFAE;
-      color: white;
-    }
   </style>
 </head>
 <body>
@@ -76,24 +58,11 @@
   <div class="container">
     <h2 id="person-name">Loading...</h2>
     <p><strong>Check-In Time:</strong> <span id="checkin-time">Loading...</span></p>
+    <!--<p><strong>Course Name:</strong> <span id="course-name">Loading...</span></p>
+    <p><strong>Classroom Name:</strong> <span id="classroom-name">Loading...</span></p>-->
     <p><strong>Course ID:</strong> <span id="course-id">Loading...</span></p>
+    <p><strong>Person ID:</strong> <span id="person-id">Loading...</span></p>
     <p><strong>Email:</strong> <span id="email">Loading...</span></p>
-
-    <h3>Other People in this Course</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>ลำดับ</th>
-          <th>ชื่อ</th>
-          <th>สถานะ</th>
-        </tr>
-      </thead>
-      <tbody id="other-people-list">
-        <tr>
-          <td colspan="3">Loading...</td>
-        </tr>
-      </tbody>
-    </table>
 
     <button id="go-back-button" class="back-button">Go Back</button>
   </div>
@@ -117,32 +86,28 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    const loadOtherPeople = async (courseId, personId) => {
-      const peopleRef = ref(db, 'people/' + courseId);
-      const checkinRef = ref(db, 'checkins/' + courseId);
-      const peopleSnapshot = await get(peopleRef);
-      const checkinSnapshot = await get(checkinRef);
+    const getCheckinDetails = async (courseId, personId) => {
+      const checkinRef = ref(db, 'checkins/' + courseId + '/' + personId);
+      const snapshot = await get(checkinRef);
 
-      if (peopleSnapshot.exists()) {
-        const peopleData = peopleSnapshot.val();
-        const otherPeopleList = document.getElementById('other-people-list');
-        otherPeopleList.innerHTML = '';
+      if (snapshot.exists()) {
+        const checkinData = snapshot.val();
+        const checkinTime = new Date(checkinData.checkinTime);
+        document.getElementById('checkin-time').textContent = checkinTime.toLocaleString();
+      } else {
+        alert('No check-in data found for this person');
+        window.location.href = 'courseDetails.html?courseId=' + courseId;
+      }
 
-        let index = 1;
-        for (let key in peopleData) {
-          const person = peopleData[key];
-          const isCheckedIn = checkinSnapshot.exists() && checkinSnapshot.val()[key];
-          const status = isCheckedIn ? 'เช็คชื่อแล้ว' : 'กำลังเรียน';
-
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${index}</td>
-            <td>${person.name}</td>
-            <td>${status}</td>
-          `;
-          otherPeopleList.appendChild(row);
-          index++;
-        }
+      // Fetch course details (name and classroom)
+      const courseRef = ref(db, 'courses/' + courseId);
+      const courseSnapshot = await get(courseRef);
+      if (courseSnapshot.exists()) {
+        const courseData = courseSnapshot.val();
+        document.getElementById('course-name').textContent = courseData.name || 'Course not available';
+        document.getElementById('classroom-name').textContent = courseData.classroom || 'Classroom not available';
+      } else {
+        alert('Course data not found');
       }
     };
 
@@ -162,9 +127,9 @@
         const personData = personSnapshot.val();
         document.getElementById('person-name').textContent = personData.name || 'Unknown Person';
         document.getElementById('person-id').textContent = personId;
-        document.getElementById('email').textContent = personData.email || 'Not provided';
+        document.getElementById('email').textContent = personData.email || 'Email not provided';
         document.getElementById('course-id').textContent = courseId;
-        loadOtherPeople(courseId, personId);
+        getCheckinDetails(courseId, personId);
       } else {
         alert('No person data found for this ID');
         window.location.href = 'course.html?courseId=' + courseId;
