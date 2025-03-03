@@ -180,7 +180,6 @@
       }
     });
 
-    document.getElementById("cancel-button").addEventListener("click", function() {
     // ดึง courseId จาก URL
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get("courseId");  // ดึงค่า courseId
@@ -193,7 +192,6 @@
       // ถ้าไม่มี courseId, ไปที่หน้า dashboard
       window.location.href = "dashboard.html";
     }
-  });
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
