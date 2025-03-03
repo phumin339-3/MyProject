@@ -110,8 +110,8 @@
       <label for="edit-name">Person's Name:</label>
       <input type="text" id="edit-name" placeholder="Enter Name" required>
 
-      <label for="edit-role">Role:</label>
-      <input type="text" id="edit-role" placeholder="Enter Role" required>
+      <label for="edit-email">Email:</label>
+      <input type="email" id="edit-email" placeholder="Enter Email" required>
 
       <button type="submit">Save Changes</button>
       <button type="button" class="cancel-button" id="cancel-button">Cancel</button>
@@ -154,7 +154,7 @@
       if (snapshot.exists()) {
         const personData = snapshot.val();
         document.getElementById('edit-name').value = personData.name;
-        document.getElementById('edit-role').value = personData.role;
+        document.getElementById('edit-email').value = personData.email;
       } else {
         alert('Person not found');
         window.location.href = 'course.html?courseId=' + courseId;
@@ -163,12 +163,12 @@
 
     const savePersonData = async (courseId, personId) => {
       const name = document.getElementById('edit-name').value;
-      const role = document.getElementById('edit-role').value;
+      const email = document.getElementById('edit-email').value;
 
       const personRef = ref(db, 'people/' + courseId + '/' + personId);
       await update(personRef, {
         name: name,
-        role: role
+        email: email
       });
       alert('Person updated successfully');
       window.location.href = `course.html?courseId=${courseId}`;

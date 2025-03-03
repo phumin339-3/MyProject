@@ -192,7 +192,7 @@
     <div id="people" class="content">
       <h3>People in this Course</h3>  
       <div id="people-container"></div>
-</div>
+</div>  
 
   </div>
 
@@ -274,7 +274,7 @@
           personElement.classList.add('person-item');
           personElement.innerHTML = `
             <h4>${person.name}</h4>
-            <p>Role: ${person.role || 'Not defined'}</p>
+            <p>Email: ${person.email || 'Not provided'}</p>
             <div class="person-actions">
               <button class="edit-button edit-button-people" data-id="${key}">Edit</button>
               <button class="delete-button delete-button-people" data-id="${key}">Delete</button>

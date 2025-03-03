@@ -180,20 +180,20 @@
       }
     });
 
-    //document.getElementById("cancel-button").addEventListener("click", function() {
+    document.getElementById("cancel-button").addEventListener("click", function() {
     // ดึง courseId จาก URL
-    //const urlParams = new URLSearchParams(window.location.search);
-    //const courseId = urlParams.get("courseId");  // ดึงค่า courseId
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get("courseId");  // ดึงค่า courseId
 
     // ตรวจสอบว่าได้รับ courseId หรือไม่
-    //if (courseId) {
+    if (courseId) {
       // ถ้ามี courseId, ไปที่หน้า course.html และส่ง courseId
-      //window.location.href = `course.html?courseId=${courseId}`;
-    //} else {
+      window.location.href = `course.html?courseId=${courseId}`;
+    } else {
       // ถ้าไม่มี courseId, ไปที่หน้า dashboard
-      //window.location.href = "dashboard.html";
-    //}
-  //});
+      window.location.href = "dashboard.html";
+    }
+  });
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
