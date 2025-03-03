@@ -59,7 +59,7 @@
       background-color: #5C6BC0;
       color: white;
     }
-    .quiz-btn {
+    .Question-btn {
       background-color: #EC407A;
       color: white;
     }
@@ -250,6 +250,7 @@
                         </div>
                         <div>
                           <button class="QR-Code-btn" onclick="QRCode('${cid}')">QR Code</button>
+                          <button class="Question-btn" onclick="Question('${cid}')">Question</button>
                           <button class="attendance-btn" onclick="takeAttendance('${cid}')">Check Attendance</button>
                           <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
                           <button class="delete-btn" onclick="deleteCourse('${userId}', '${cid}')">Delete</button>
@@ -296,7 +297,7 @@
     };
 
     // ✅ ฟังก์ชันทำแบบทดสอบ
-    window.takeQuiz = (courseId) => {
+    window.Question = (courseId) => {
         // TODO: Implement quiz logic
         //alert(`Taking quiz for course ID: ${courseId}`)
         window.location.href = `askQuestion.html?courseId=${courseId}`;
