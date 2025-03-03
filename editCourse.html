@@ -137,9 +137,10 @@
       <input type="text" id="classroom-name" required>
 
       <label class="file-input">
-        Change Course Image
-        <input type="file" id="course-image" accept="image/*">
+    Change Course Image
+      <input type="file" id="course-image" accept="image/*">
       </label>
+      <img id="preview-image" src="default-course.jpg" alt="Course Image Preview" style="width: 150px; height: auto; margin-top: 10px;">
       
       <button type="submit">Save Changes</button>
       <button type="button" id="back-to-dashboard">Back to Dashboard</button>
@@ -256,6 +257,40 @@
     // 📌 เมื่อกดปุ่ม Back to Dashboard
     backButton.addEventListener('click', () => {
       window.location.replace('dashboard.html');
+    });
+    
+    const previewImage = document.getElementById('preview-image');
+
+    // 📌 โหลดภาพเดิมจาก Firebase
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            const courseRef = ref(db, `users/${user.uid}/classroom/${courseId}`);
+            try {
+                const snapshot = await get(courseRef);
+                if (snapshot.exists()) {
+                    const courseData = snapshot.val();
+                    if (courseData.image) {
+                        previewImage.src = courseData.image;  // ✅ แสดงภาพจาก Firebase
+                        base64Image = courseData.image;       // ✅ อัปเดตค่า Base64 ด้วย
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching course data:", error);
+            }
+        }
+    });
+    
+    // 📌 แสดงตัวอย่างรูปภาพใหม่
+    document.getElementById('course-image').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                base64Image = e.target.result;
+                previewImage.src = base64Image; // ✅ อัปเดตภาพ Preview
+            };
+            reader.readAsDataURL(file);
+        }
     });
 
   </script>
