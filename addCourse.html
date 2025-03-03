@@ -204,15 +204,16 @@
     const user = auth.currentUser;
     if (!user) return;
 
-    const courseId = Date.now().toString(); // สร้าง courseId จาก timestamp
-    const courseRef = ref(db, `classroom/${courseId}`);
+    const courseRef = ref(db, `users/${user.uid}/classroom`);
+    const newCourseRef = push(courseRef); // Firebase สร้าง ID อัตโนมัติ
+    const courseId = newCourseRef.key; // ได้รับ courseId
 
-    // บันทึกข้อมูลคอร์ส รวมถึงข้อมูลผู้สร้าง
-    await set(courseRef, {
+    // บันทึกข้อมูลคอร์สรวมถึง courseId
+    await set(newCourseRef, {
+      courseId: courseId, // เก็บ courseId
       name: courseName,
       classroom: classroomName,
-      image: base64Image || 'default-image.jpg', // เก็บรูปภาพเป็น Base64
-      createdBy: user.uid // ✅ บันทึก ID ของผู้สร้างคอร์ส
+      image: base64Image || 'default-image.jpg', // หากไม่มีภาพเลือก
     });
 
     alert('Course saved successfully!');
@@ -222,7 +223,6 @@
     alert('Error saving course: ' + error.message);
   }
 };
-
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
