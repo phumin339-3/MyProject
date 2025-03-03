@@ -150,8 +150,19 @@
       background-color: #ddd;
       transform: scale(1.05);
     }
+    .go-to-course-btn {
+    background-color: #FF7043; /* สีปุ่ม */
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    }
     
-   
+    .go-to-course-btn:hover {
+        opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -234,30 +245,31 @@
                 courseList.innerHTML = ''; // ล้างคอร์สเก่าออกก่อน
 
                 Object.keys(courses).forEach((cid) => {
-                    const courseItem = document.createElement('li');
-                    courseItem.classList.add('course-item');
-                    
-                    // ใช้ property 'image' แทน 'imageUrl' และเช็คให้ชัดเจนว่าเป็น Base64 หรือไม่
-                    const imageUrl = courses[cid].image?.startsWith('data:image') ? courses[cid].image : 'default-course.jpg';
-                    
-                    console.log('Image URL:', imageUrl); // ลองเช็คใน Console ด้วยว่าค่า URL ถูกต้องไหม
-                
-                    courseItem.innerHTML = `
-                        <div class="course-details">
-                          <strong>Course Name:</strong> ${courses[cid].name} <br>
-                          <strong>Classroom:</strong> ${courses[cid].classroom} <br>
-                          <img src="${imageUrl}" alt="Course Image" class="course-image" style="width: 100px; height: auto;">
-                        </div>
-                        <div>
-                          <button class="QR-Code-btn" onclick="QRCode('${cid}')">QR Code</button>
-                          <button class="Question-btn" onclick="Question('${cid}')">Question</button>
-                          <button class="attendance-btn" onclick="takeAttendance('${cid}')">Check Attendance</button>
-                          <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
-                          <button class="delete-btn" onclick="deleteCourse('${userId}', '${cid}')">Delete</button>
-                        </div>
-                    `;
-                    courseList.appendChild(courseItem);
-                });
+            const courseItem = document.createElement('li');
+            courseItem.classList.add('course-item');
+            
+            const imageUrl = courses[cid].image?.startsWith('data:image') ? courses[cid].image : 'default-course.jpg';
+            
+            console.log('Image URL:', imageUrl); 
+            
+            courseItem.innerHTML = `
+                <div class="course-details">
+                  <strong>Course Name:</strong> ${courses[cid].name} <br>
+                  <strong>Classroom:</strong> ${courses[cid].classroom} <br>
+                  <img src="${imageUrl}" alt="Course Image" class="course-image" style="width: 100px; height: auto;">
+                </div>
+                <div>
+                  <button class="QR-Code-btn" onclick="QRCode('${cid}')">QR Code</button>
+                  <button class="Question-btn" onclick="Question('${cid}')">Question</button>
+                  <button class="attendance-btn" onclick="takeAttendance('${cid}')">Check Attendance</button>
+                  <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
+                  <button class="delete-btn" onclick="deleteCourse('${userId}', '${cid}')">Delete</button>
+                  <button class="go-to-course-btn" onclick="goToCourse('${cid}')">Go to Course</button>
+                </div>
+            `;
+            courseList.appendChild(courseItem);
+              });
+
             }
         } catch (error) {
             console.error("Error fetching courses:", error);
