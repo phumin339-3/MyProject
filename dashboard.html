@@ -230,7 +230,7 @@
                         <div class="course-details">
                           <strong>Course Name:</strong> ${courses[cid].name} <br>
                           <strong>Classroom:</strong> ${courses[cid].classroom} <br>
-                          <img src="${courses[cid].imageUrl || 'default-course.jpg'}" alt="Course Image" class="course-image">
+                          <img src="${courses[cid].image || 'default-course.jpg'}" alt="Course Image" class="course-image">
                         </div>
                         <div>
                           <button class="attendance-btn" onclick="takeAttendance('${cid}')">Check Attendance</button>
