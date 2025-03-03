@@ -408,7 +408,7 @@
             const courseId = getCourseIdFromUrl(); // ดึง courseId จาก URL
             loadCourseDetails(courseId); // โหลดข้อมูลคอร์สตามปกติ
             loadQuestions(); // โหลดคำถามในคอร์ส
-    
+        
             // เพิ่มผู้ใช้เข้าคอร์สโดยอัตโนมัติหากยังไม่มีในระบบ
             const peopleRef = ref(db, `people/${courseId}/${user.uid}`);
             get(peopleRef).then(snapshot => {
