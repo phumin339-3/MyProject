@@ -236,19 +236,23 @@
                 Object.keys(courses).forEach((cid) => {
                     const courseItem = document.createElement('li');
                     courseItem.classList.add('course-item');
+                    
+                    // ใช้ property 'image' แทน 'imageUrl' และเช็คให้ชัดเจนว่าเป็น Base64 หรือไม่
+                    const imageUrl = courses[cid].image?.startsWith('data:image') ? courses[cid].image : 'default-course.jpg';
+                    
+                    console.log('Image URL:', imageUrl); // ลองเช็คใน Console ด้วยว่าค่า URL ถูกต้องไหม
+                
                     courseItem.innerHTML = `
                         <div class="course-details">
                           <strong>Course Name:</strong> ${courses[cid].name} <br>
                           <strong>Classroom:</strong> ${courses[cid].classroom} <br>
-                          <img src="${courses[cid].imageUrl || 'default-course.jpg'}" alt="Course Image" class="course-image">
+                          <img src="${imageUrl}" alt="Course Image" class="course-image" style="width: 100px; height: auto;">
                         </div>
                         <div>
                           <button class="QR-Code-btn" onclick="QRCode('${cid}')">QR Code</button>
                           <button class="attendance-btn" onclick="takeAttendance('${cid}')">Check Attendance</button>
-                          <button class="quiz-btn" onclick="takeQuiz('${cid}')">Take Quiz</button>
                           <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
                           <button class="delete-btn" onclick="deleteCourse('${userId}', '${cid}')">Delete</button>
-                          <button class="go-to-course-btn" onclick="goToCourse('${cid}')">Go to Course</button>
                         </div>
                     `;
                     courseList.appendChild(courseItem);
@@ -258,8 +262,6 @@
             console.error("Error fetching courses:", error);
         }
     }
-
-
 
     // ✅ ฟังก์ชันลบคอร์ส
     window.deleteCourse = async (userId, courseId) => {

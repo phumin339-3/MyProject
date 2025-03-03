@@ -118,6 +118,11 @@
       height: 100%;
       cursor: pointer;
     }
+    .button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px; /* เพิ่มระยะห่างจากรูปภาพ */
+    }
   </style>
 </head>
 </head>
@@ -141,10 +146,13 @@
       <input type="text" id="classroom-name" required>
 
       <label class="file-input">
-        Choose Course Image
-        <input type="file" id="course-image" accept="image/*">
+          Choose Course Image
+          <input type="file" id="course-image" accept="image/*">
       </label>
-      
+      <img id="preview-image" src="default-course.jpg" alt="Course Image Preview" style="width: 150px; height: auto; margin-top: 10px;">
+
+      <!-- ใช้ div แยกปุ่มออกมา และเพิ่มคลาส .button-container -->
+      <div class="button-container">
       <button type="submit">Save Course</button>
     </form>
   </div>
@@ -169,17 +177,17 @@
     let base64Image = "";
 
     // 📌 แสดงตัวอย่างรูปภาพที่เลือก
-    document.getElementById('course-image').addEventListener('change', (event) => {
+     document.getElementById('course-image').addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          base64Image = e.target.result;
-        };
-        reader.readAsDataURL(file);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+              base64Image = e.target.result;
+              console.log('Base64 Image:', base64Image); // เพิ่มบรรทัดนี้เพื่อตรวจสอบค่า
+          };
+          reader.readAsDataURL(file);
       }
     });
-
   
     // ดึง courseId จาก URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -227,6 +235,22 @@
       await signOut(auth);
       window.location.replace('index.html');
     });
+
+    // 📌 แสดงตัวอย่างรูปภาพที่เลือกและอัปเดตค่า base64Image
+const previewImage = document.getElementById('preview-image');
+document.getElementById('course-image').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            base64Image = e.target.result;
+            previewImage.src = base64Image; // ✅ อัปเดตภาพตัวอย่างทันที
+            console.log('Base64 Image:', base64Image); // ✅ ตรวจสอบค่า Base64
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
   </script>
 </body>
 </html>
