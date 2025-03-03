@@ -141,9 +141,12 @@
       <input type="text" id="classroom-name" required>
 
       <label class="file-input">
-        Choose Course Image
-        <input type="file" id="course-image" accept="image/*">
+          Choose Course Image
+          <input type="file" id="course-image" accept="image/*">
       </label>
+      
+      <!-- ✅ เพิ่ม img แสดง Preview -->
+      <img id="preview-image" src="default-course.jpg" alt="Course Image Preview" style="width: 150px; height: auto; margin-top: 10px;">
       
       <button type="submit">Save Course</button>
     </form>
@@ -227,6 +230,20 @@
       await signOut(auth);
       window.location.replace('index.html');
     });
+
+    const previewImage = document.getElementById('preview-image');
+document.getElementById('course-image').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            base64Image = e.target.result;
+            previewImage.src = base64Image; // ✅ แสดงภาพตัวอย่าง
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
   </script>
 </body>
 </html>
