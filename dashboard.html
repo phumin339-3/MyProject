@@ -53,6 +53,16 @@
       background-color:  #41D3BD;
       color: white;
     }
+        /* สไตล์ปุ่มใหม่ */
+    .attendance-btn {
+      background-color: #5C6BC0;
+      color: white;
+    }
+    .Question-btn {
+      background-color: #EC407A;
+      color: white;
+    }
+
     button:hover {
       opacity: 0.8; 
       background-color: #E0E7E9;
@@ -158,7 +168,7 @@
       <div id="dropdown-menu" class="dropdown-menu">
         <button id="edit-profile-button">Edit Profile</button>
         <button id="add-course-button">Add Course</button>
-        <!--<button id="question-button">question</button>-->
+        <button id="question-button">question</button>
         <button id="logout-button">Logout</button>
       </div>
     </div>
@@ -220,9 +230,11 @@
                         <div class="course-details">
                           <strong>Course Name:</strong> ${courses[cid].name} <br>
                           <strong>Classroom:</strong> ${courses[cid].classroom} <br>
-                          <img src="${courses[cid].image || 'default-course.jpg'}" alt="Course Image" class="course-image">
+                          <img src="${courses[cid].imageUrl || 'default-course.jpg'}" alt="Course Image" class="course-image">
                         </div>
                         <div>
+                          <button class="attendance-btn" onclick="takeAttendance('${cid}')">Check Attendance</button>
+                          <button class="quiz-btn" onclick="takeQuiz('${cid}')">Take Quiz</button>
                           <button class="edit-btn" onclick="editCourse('${cid}', '${courses[cid].name}', '${courses[cid].classroom}')">Edit</button>
                           <button class="delete-btn" onclick="deleteCourse('${userId}', '${cid}')">Delete</button>
                           <button class="go-to-course-btn" onclick="goToCourse('${cid}')">Go to Course</button>
@@ -251,6 +263,26 @@
         }
     };
 
+      // ฟังก์ชันไปที่หน้า Course
+      window.goToCourse = (courseId) => {
+        // ส่ง courseId ผ่าน URL
+        window.location.href = `course.html?courseId=${courseId}`;
+    };
+
+    // ✅ ฟังก์ชันเช็คชื่อ
+    window.takeAttendance = (courseId) => {
+        // TODO: Implement attendance logic
+        //alert(`Taking attendance for course ID: ${courseId}`);
+        window.location.href = `takeAttendnce.html?courseId=${courseId}`;
+    };
+
+    // ✅ ฟังก์ชันทำแบบทดสอบ
+    window.Question = (courseId) => {
+        // TODO: Implement quiz logic
+        //alert(`Taking quiz for course ID: ${courseId}`)
+        window.location.href = `askQuestion.html?courseId=${courseId}`;
+      
+    };
 
     // ✅ ฟังก์ชันแก้ไขคอร์ส (นำไปใช้ในหน้า Edit Course)
     window.editCourse = (courseId, courseName, classroomName) => {
@@ -260,14 +292,7 @@
         window.location.href = 'editCourse.html'; // ไปที่หน้าแก้ไขคอร์ส
     };
 
-    // ฟังก์ชันไปที่หน้า Course
-        window.goToCourse = (courseId) => {
-        // ส่ง courseId ผ่าน URL
-        window.location.href = `course.html?courseId=${courseId}`;
-    };
-
-
-
+    
 
     // ✅ ปุ่ม logout
     document.getElementById('logout-button').addEventListener('click', logout);
@@ -283,11 +308,8 @@
         window.location.href = 'addCourse.html';
     });
 
-    // ✅ ปุ่มถามคำถาม
-    //document.getElementById('question-button').addEventListener('click', () => {
-        //window.location.href = 'askQuestion.html'; 
-    //});
     
+
     
 
     document.getElementById("menu-toggle").addEventListener("click", function () {
