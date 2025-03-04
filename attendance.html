@@ -94,12 +94,33 @@
   </div>
 
   <script type="module">
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+    // Firebase Config
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
     import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
-    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
+      authDomain: "myproject-9bc7e.firebaseapp.com",
+      projectId: "myproject-9bc7e",
+      storageBucket: "myproject-9bc7e.appspot.com",
+      messagingSenderId: "761031996090",
+      appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
+      measurementId: "G-YSGKSJG3ML"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    const auth = getAuth();
-    const db = getDatabase();
+    onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("ผู้ใช้งาน:", user.displayName);
+  } else {
+    console.log("ยังไม่ได้เข้าสู่ระบบ");
+  }
+});
 
     // ฟังก์ชันดึงค่าจาก URL
     function getParameterByName(name, url = window.location.href) {
