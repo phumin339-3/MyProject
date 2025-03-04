@@ -184,6 +184,42 @@
       alert("เช็คชื่อสำเร็จ");
     };
   }
+  // ฟังก์ชันตรวจสอบเมื่อคลิก "เปิดเช็คชื่อ" หรือ "ปิดเช็คชื่อ"
+function handleCheckInStatus() {
+  const courseId = getCourseIdFromUrl(); // ดึง courseId จาก URL หรือข้อมูลที่เกี่ยวข้อง
+  const userId = firebase.auth().currentUser.uid;
+  const today = new Date().toISOString().split('T')[0]; // วันที่ในรูปแบบ YYYY-MM-DD
+
+  // ถ้าเป็นการเปิดเช็คชื่อ
+  if (isCheckInOpen) {
+    const attendanceRef = firebase.database().ref(`attendances/${courseId}/${today}/${userId}`);
+    attendanceRef.set({
+      status: 'checked-in'
+    }).then(() => {
+      console.log('สถานะเช็คชื่อถูกบันทึกแล้ว');
+    }).catch((error) => {
+      console.error('เกิดข้อผิดพลาดในการบันทึกสถานะเช็คชื่อ:', error);
+    });
+  }
+}
+
+// ฟังก์ชันดึงข้อมูลเช็คชื่อที่บันทึกไว้
+function loadAttendanceData(courseId, today) {
+  const attendanceRef = firebase.database().ref(`attendances/${courseId}/${today}`);
+  attendanceRef.once('value')
+    .then((snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        console.log('ข้อมูลเช็คชื่อ:', data);
+        // แสดงข้อมูลเช็คชื่อใน UI
+      } else {
+        console.log('ไม่มีข้อมูลเช็คชื่อในวันนี้');
+      }
+    })
+    .catch((error) => {
+      console.error('เกิดข้อผิดพลาดในการดึงข้อมูลเช็คชื่อ:', error);
+    });
+}
 </script>
 
 </body>
