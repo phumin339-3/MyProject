@@ -3,256 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Course Details</title>
+  <title>ระบบเช็คชื่อ</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #E0E7E9;
       margin: 0;
       padding: 0;
-      background-color: #E0E7E9;
     }
 
     header {
       background-color: #2CBFAE;
-      padding: 15px;
+      padding: 20px;
       text-align: center;
       color: white;
       font-size: 24px;
     }
 
     .container {
-      max-width: 1200px;
+      width: 80%;
       margin: 20px auto;
-      padding: 20px;
       background-color: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
     }
 
     button {
-      padding: 8px 12px;
-      margin: 5px;
-      cursor: pointer;
+      padding: 10px;
+      margin: 10px 5px;
       border: none;
-      border-radius: 5px;
-      font-size: 14px;
       background-color: #2CBFAE;
       color: white;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
     button:hover {
       opacity: 0.8;
     }
 
-    .attendance-section {
-      margin-top: 20px;
-    }
-
-    #attendance-form {
-      margin-top: 20px;
-      display: none;
-    }
-
-    #attendance-list {
-      margin-top: 20px;
-      display: none;
+    select {
+      padding: 5px;
+      margin-right: 10px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>รายละเอียดคอร์ส</h1>
-  </header>
+<header>
+  ระบบเช็คชื่อ
+</header>
 
-  <div class="container">
-    <h2>ข้อมูลวิชา</h2>
-    <div id="course-info">
-      <!-- ข้อมูลวิชาจะถูกแสดงที่นี่ -->
-    </div>
+<div class="container">
+  <h2>ข้อมูลวิชา</h2>
+  <div id="course-info"></div>
 
-    <div class="attendance-section">
-      <button id="open-attendance-btn">เปิดการเช็คชื่อ</button>
-      <button id="close-attendance-btn" style="display:none;">ปิดการเช็คชื่อ</button>
-      <button id="show-attendance-btn" style="display:none;">แสดงรายชื่อ</button>
-    </div>
-
-    <!-- ฟอร์มการเช็คชื่อ -->
-    <form id="attendance-form">
-      <label for="status">สถานะ:</label>
-      <select id="status" name="status">
-        <option value="present">มาที่เรียน</option>
-        <option value="absent">ไม่มาที่เรียน</option>
-        <option value="excused">ขออนุญาต</option>
-      </select>
-      <button type="submit">บันทึก</button>
-    </form>
-
-    <!-- แสดงรายชื่อผู้ที่เช็คชื่อ -->
-    <div id="attendance-list">
-      <!-- รายชื่อผู้ที่เข้าร่วมการเช็คชื่อจะถูกแสดงที่นี่ -->
-    </div>
+  <div class="attendance-section">
+    <button id="open-attendance-btn">เปิดเช็คชื่อ</button>
+    <button id="close-attendance-btn" style="display: none;">ปิดเช็คชื่อ</button>
+    <button id="show-attendance-btn" style="display: none;">แสดงรายชื่อ</button>
   </div>
 
-  <script type="module">
-    // Firebase Config
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
-    import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
-    
-    const firebaseConfig = {
-      apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
-      authDomain: "myproject-9bc7e.firebaseapp.com",
-      projectId: "myproject-9bc7e",
-      storageBucket: "myproject-9bc7e.appspot.com",
-      messagingSenderId: "761031996090",
-      appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
-      measurementId: "G-YSGKSJG3ML"
-    };
-    
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  <form id="attendance-form" style="display:none;">
+    <label for="status">สถานะ:</label>
+    <select id="status">
+      <option value="present">มาเรียน</option>
+      <option value="absent">ขาดเรียน</option>
+      <option value="excused">ขออนุญาต</option>
+    </select>
+    <button type="submit">บันทึก</button>
+  </form>
 
-    onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("ผู้ใช้งาน:", user.displayName);
-  } else {
-    console.log("ยังไม่ได้เข้าสู่ระบบ");
+  <div id="attendance-list"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js';
+  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
+  import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAseXZho_Df4hlLXvh5lYg5AXlFUZqHU5Q",
+    authDomain: "myproject-9bc7e.firebaseapp.com",
+    projectId: "myproject-9bc7e",
+    storageBucket: "myproject-9bc7e.appspot.com",
+    messagingSenderId: "761031996090",
+    appId: "1:761031996090:web:80b4d43e27c9c6ab338883",
+    measurementId: "G-YSGKSJG3ML"
+  };
+
+  // ✅ Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  console.log("Firebase App:", app.name);
+
+  function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
-});
 
-    // ฟังก์ชันดึงค่าจาก URL
-    function getParameterByName(name, url = window.location.href) {
-      name = name.replace(/[\[\]]/g, '\\$&');
-      var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-        results = regex.exec(url);
-      if (!results) return null;
-      if (!results[2]) return '';
-      return decodeURIComponent(results[2].replace(/\+/g, ' '));
-    }
+  const courseId = getParameterByName('courseId');
 
-    const courseId = getParameterByName('courseId');
-    const userId = auth.currentUser ? auth.currentUser.uid : null;
-
-    // ตรวจสอบว่ามี courseId และ userId
-    if (!courseId || !userId) {
-      alert('ไม่พบ Course ID หรือ User ID');
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      console.log("เข้าสู่ระบบ:", user.displayName);
+      await fetchCourseData(courseId);
+      handleAttendance(user.uid);
     } else {
-      // ดึงข้อมูลวิชาจาก Firebase
-      const courseRef = ref(db, `courses/${courseId}`);
-      get(courseRef)
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const courseData = snapshot.val();
-            document.getElementById('course-info').innerHTML = `
-              <h3>${courseData.name}</h3>
-              <p>ห้องเรียน: ${courseData.classroom}</p>
-            `;
-          } else {
-            console.log('ไม่พบข้อมูลวิชา');
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-
-      // เปิดและปิดการเช็คชื่อ
-      const openAttendanceBtn = document.getElementById('open-attendance-btn');
-      const closeAttendanceBtn = document.getElementById('close-attendance-btn');
-      const showAttendanceBtn = document.getElementById('show-attendance-btn');
-      const attendanceForm = document.getElementById('attendance-form');
-      const attendanceList = document.getElementById('attendance-list');
-
-      openAttendanceBtn.addEventListener('click', () => {
-        openAttendanceBtn.style.display = 'none';
-        closeAttendanceBtn.style.display = 'inline-block';
-        showAttendanceBtn.style.display = 'inline-block';
-        attendanceForm.style.display = 'block';
-      });
-
-      closeAttendanceBtn.addEventListener('click', () => {
-        openAttendanceBtn.style.display = 'inline-block';
-        closeAttendanceBtn.style.display = 'none';
-        showAttendanceBtn.style.display = 'none';
-        attendanceForm.style.display = 'none';
-      });
-
-      showAttendanceBtn.addEventListener('click', () => {
-        attendanceList.style.display = 'block';
-        // ดึงข้อมูลการเช็คชื่อจาก Firebase
-        const attendanceRef = ref(db, `attendances/${courseId}`);
-        get(attendanceRef)
-          .then((snapshot) => {
-            if (snapshot.exists()) {
-              const attendanceData = snapshot.val();
-              let listHTML = '<ul>';
-              for (let date in attendanceData) {
-                for (let user in attendanceData[date]) {
-                  const li = document.createElement('li');
-                    li.textContent = `${user}: ${attendanceData[date][user]}`;
-                    document.getElementById('attendance-list').appendChild(li);
-
-                }
-              }
-              listHTML += '</ul>';
-              attendanceList.innerHTML = listHTML;
-            } else {
-              attendanceList.innerHTML = 'ไม่มีการเช็คชื่อ';
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      });
-
-      // บันทึกข้อมูลการเช็คชื่อ
-      document.getElementById('attendance-form').addEventListener('submit', (event) => {
-        event.preventDefault();
-        const status = document.getElementById('status').value;
-        const today = new Date().toLocaleDateString();
-
-        const attendanceRef = ref(db, `attendances/${courseId}/${today}/${userId}`);
-        set(attendanceRef, status)
-          .then(() => {
-            alert('บันทึกการเช็คชื่อเรียบร้อย!');
-          })
-          .catch((error) => {
-            console.error('เกิดข้อผิดพลาดในการบันทึก:', error);
-          });
-      });
+      alert("กรุณาเข้าสู่ระบบก่อน");
+      window.location.href = "login.html"; // เปลี่ยนไปหน้า Login ถ้าไม่ได้เข้าสู่ระบบ
     }
-    onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const userId = user.uid;
-    await fetchCourseData(courseId);
-    handleAttendance(userId);
-  } else {
-    alert('กรุณาเข้าสู่ระบบ');
-  }
-});
-
-async function fetchCourseData(courseId) {
-  const courseRef = ref(db, `courses/${courseId}`);
-  const snapshot = await get(courseRef);
-  if (snapshot.exists()) {
-    const data = snapshot.val();
-    document.getElementById('course-info').innerHTML = `
-      <h3>${data.name}</h3>
-      <p>ห้องเรียน: ${data.classroom}</p>
-    `;
-  }
-}
-    function getUserName(courseId, userId) {
-  const peopleRef = ref(db, `people/${courseId}/${userId}`);
-  return get(peopleRef).then((snapshot) => {
-    if (snapshot.exists()) {
-      return snapshot.val().name;
-    }
-    return 'ไม่ทราบชื่อ';
   });
-}
-       
-  </script>
+
+  async function fetchCourseData(courseId) {
+    const courseRef = ref(db, `courses/${courseId}`);
+    const snapshot = await get(courseRef);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      document.getElementById('course-info').innerHTML = `
+        <h3>${data.name}</h3>
+        <p>ห้องเรียน: ${data.classroom}</p>
+      `;
+    } else {
+      alert("ไม่พบข้อมูลวิชา");
+    }
+  }
+
+  function handleAttendance(userId) {
+    const openBtn = document.getElementById('open-attendance-btn');
+    const closeBtn = document.getElementById('close-attendance-btn');
+    const showBtn = document.getElementById('show-attendance-btn');
+    const form = document.getElementById('attendance-form');
+    const list = document.getElementById('attendance-list');
+
+    openBtn.onclick = () => {
+      form.style.display = "block";
+      openBtn.style.display = "none";
+      closeBtn.style.display = "inline-block";
+      showBtn.style.display = "inline-block";
+    };
+
+    closeBtn.onclick = () => {
+      form.style.display = "none";
+      openBtn.style.display = "inline-block";
+      closeBtn.style.display = "none";
+      showBtn.style.display = "none";
+    };
+
+    showBtn.onclick = async () => {
+      list.innerHTML = "กำลังโหลด...";
+      const attendanceRef = ref(db, `attendances/${courseId}`);
+      const snapshot = await get(attendanceRef);
+      if (snapshot.exists()) {
+        list.innerHTML = "";
+        const data = snapshot.val();
+        for (let date in data) {
+          list.innerHTML += `<h4>${date}</h4>`;
+          for (let user in data[date]) {
+            list.innerHTML += `<p>${user}: ${data[date][user]}</p>`;
+          }
+        }
+      } else {
+        list.innerHTML = "ไม่มีข้อมูลเช็คชื่อ";
+      }
+    };
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('status').value;
+      const today = new Date().toLocaleDateString();
+
+      const attendanceRef = ref(db, `attendances/${courseId}/${today}/${userId}`);
+      await set(attendanceRef, status);
+      alert("เช็คชื่อสำเร็จ");
+    };
+  }
+</script>
+
 </body>
 </html>
