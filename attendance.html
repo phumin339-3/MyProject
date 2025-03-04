@@ -143,47 +143,48 @@
     const list = document.getElementById('attendance-list');
 
     openBtn.onclick = () => {
-      form.style.display = "block";
-      openBtn.style.display = "none";
-      closeBtn.style.display = "inline-block";
-      showBtn.style.display = "inline-block";
+        form.style.display = "block";
+        openBtn.style.display = "none";
+        closeBtn.style.display = "inline-block";
+        showBtn.style.display = "inline-block";
     };
 
     closeBtn.onclick = () => {
-      form.style.display = "none";
-      openBtn.style.display = "inline-block";
-      closeBtn.style.display = "none";
-      showBtn.style.display = "none";
+        form.style.display = "none";
+        openBtn.style.display = "inline-block";
+        closeBtn.style.display = "none";
+        showBtn.style.display = "none";
     };
 
     showBtn.onclick = async () => {
-      list.innerHTML = "กำลังโหลด...";
-      const attendanceRef = ref(db, `attendances/${courseId}`);
-      const snapshot = await get(attendanceRef);
-      if (snapshot.exists()) {
-        list.innerHTML = "";
-        const data = snapshot.val();
-        for (let date in data) {
-          list.innerHTML += `<h4>${date}</h4>`;
-          for (let user in data[date]) {
-            list.innerHTML += `<p>${user}: ${data[date][user]}</p>`;
-          }
+        list.innerHTML = "กำลังโหลด...";
+        const attendanceRef = ref(db, `attendances/${courseId}`);
+        const snapshot = await get(attendanceRef);
+        if (snapshot.exists()) {
+            list.innerHTML = "";
+            const data = snapshot.val();
+            for (let date in data) {
+                list.innerHTML += `<h4>${date}</h4>`;
+                for (let user in data[date]) {
+                    list.innerHTML += `<p>${user}: ${data[date][user]}</p>`;
+                }
+            }
+        } else {
+            list.innerHTML = "ไม่มีข้อมูลเช็คชื่อ";
         }
-      } else {
-        list.innerHTML = "ไม่มีข้อมูลเช็คชื่อ";
-      }
     };
 
     form.onsubmit = async (e) => {
-      e.preventDefault();
-      const status = document.getElementById('status').value;
-      const today = new Date().toLocaleDateString();
+        e.preventDefault();
+        const status = document.getElementById('status').value;
+        const today = new Date().toLocaleDateString();
 
-      const attendanceRef = ref(db, `attendances/${courseId}/${today}/${userId}`);
-      await set(attendanceRef, status);
-      alert("เช็คชื่อสำเร็จ");
+        const attendanceRef = ref(db, `attendances/${courseId}/${today}/${userId}`);
+        await set(attendanceRef, status);
+        alert("เช็คชื่อสำเร็จ");
     };
-  }
+}
+
   // ฟังก์ชันตรวจสอบเมื่อคลิก "เปิดเช็คชื่อ" หรือ "ปิดเช็คชื่อ"
 function handleCheckInStatus() {
   const courseId = getCourseIdFromUrl(); // ดึง courseId จาก URL หรือข้อมูลที่เกี่ยวข้อง
