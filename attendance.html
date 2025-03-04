@@ -126,7 +126,7 @@
     const courseRef = ref(db, `courses/${courseId}`);
     const snapshot = await get(courseRef);
     console.log("Snapshot data:", snapshot.val()); // ตรวจสอบว่าได้รับข้อมูลจาก Firebase หรือไม่
-    if (snapshot.exists()) {
+    if (snapshot.exists() && snapshot.val()) {
         const data = snapshot.val();
         document.getElementById('course-info').innerHTML = `
             <h3>${data.name}</h3>
@@ -136,6 +136,7 @@
         alert("ไม่พบข้อมูลวิชา");
     }
 }
+
 
   function handleAttendance(userId) {
     const openBtn = document.getElementById('open-attendance-btn');
