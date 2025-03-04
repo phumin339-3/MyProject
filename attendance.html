@@ -96,6 +96,7 @@
   <script type="module">
     import { getAuth } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
     import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js';
 
     const auth = getAuth();
     const db = getDatabase();
@@ -167,7 +168,10 @@
               let listHTML = '<ul>';
               for (let date in attendanceData) {
                 for (let user in attendanceData[date]) {
-                  listHTML += `<li>${user}: ${attendanceData[date][user]}</li>`;
+                  const li = document.createElement('li');
+                    li.textContent = `${user}: ${attendanceData[date][user]}`;
+                    document.getElementById('attendance-list').appendChild(li);
+
                 }
               }
               listHTML += '</ul>';
@@ -184,10 +188,10 @@
       // บันทึกข้อมูลการเช็คชื่อ
       document.getElementById('attendance-form').addEventListener('submit', (event) => {
         event.preventDefault();
-        const status = document.getElementById('status').value();
+        const status = document.getElementById('status').value;
         const today = new Date().toLocaleDateString();
 
-        const attendanceRef = ref(db, `attendances/${courseId}/${userId}/${today}`);
+        const attendanceRef = ref(db, `attendances/${courseId}/${today}/${userId}`);
         set(attendanceRef, status)
           .then(() => {
             alert('บันทึกการเช็คชื่อเรียบร้อย!');
@@ -197,7 +201,16 @@
           });
       });
     }
-   
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userId = user.uid;
+        console.log('User ID:', userId);
+        fetchCourseData(courseId, userId);
+      } else {
+        alert('กรุณาเข้าสู่ระบบก่อน');
+      }
+    });
+       
   </script>
 </body>
 </html>
